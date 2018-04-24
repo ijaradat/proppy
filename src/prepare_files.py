@@ -18,6 +18,8 @@ def separate_liwc_lexicons(file):
         negations =[]
         number = []
         money =[]
+        first_pers_sing =[]
+        sec_pers =[]
         for line in f:
             line=line.strip()
             fields= line.split('\t')
@@ -35,9 +37,13 @@ def separate_liwc_lexicons(file):
                 number.append(fields[0])
             if '113' in fields:
                 money.append(fields[0])
+            if '4' in fields:
+                first_pers_sing.append(fields[0])
+            if '6' in fields:
+                sec_pers.append(fields[0])
         f.close()
         i=1
-        for lex in [swear,hear,sexual,see,negations,number,money]:
+        for lex in [swear,hear,sexual,see,negations,number,money,first_pers_sing,sec_pers]:
             with codecs.open('../data/lexicons/'+str(i)+'.txt', 'w') as out:
                 for word in lex:
                     word=word.replace('*','')
