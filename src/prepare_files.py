@@ -51,5 +51,34 @@ def separate_liwc_lexicons(file):
                 out.close()
                 i+=1
 
+def separate_subjectives(file):
+    with codecs.open(file, 'r') as f:
+        weak_subj=[]
+        strong_subj=[]
+        for line in f:
+            line=line.strip()
+            fields = line.split(' ')
+            subj = fields[0].split('=')
+            word_fields = fields[2].split('=')
+            word = word_fields[1]
+            if subj[1] == 'weaksubj':
+                weak_subj.append(word)
+            elif subj[1] == 'strongsubj' :
+                strong_subj.append(word)
+        f.close()
+        with codecs.open ('../data/lexicons/weak_subj_wilson.txt','w') as out:
+            for sub in weak_subj:
+                out.write(sub+'\n')
+            out.close()
+        with codecs.open('../data/lexicons/strong_subj_wilson.txt','w') as out:
+            for sub in strong_subj:
+                out.write(sub+'\n')
+            out.close()
 
-separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')
+
+
+
+
+
+#separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')
+separate_subjectives('../data/lexicons/subjectivity_clues_hltemnlp05/subjectivity_clues_hltemnlp05/subjclueslen1-HLTEMNLP05.txt')
