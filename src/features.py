@@ -6,12 +6,8 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 from setup import load_datset
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from sklearn.feature_extraction import DictVectorizer
-from nltk.tokenize import word_tokenize
-import codecs
-from numpy import array
-
-
+from counts_transformer import counts_vectorizer
+#from sklearn.feature_extraction import DictVectorizer
 
 
 
@@ -22,22 +18,8 @@ def extract_baseline_feature(ds):
     return tfidf_vectorizer
 
 
-def extract_from_lexicon1(ds,lexicon,feature_name):
-    print('Extracting '+feature_name + '  feature ...')
-    feature = []
-    for doc in ds:
-        tokens = word_tokenize(doc.text.lower())
-        count = 0
-        for vocab in lexicon:
-            count += tokens.count(vocab)  # count the number of all vocab in the whole document (document = a list of tokens)
-        feature.append(count)
-    feature=  array(feature)
-    dict_vectorizer = DictVectorizer()
-    dict_vectorizer.fit(feature)
-    print('done !')
-    return feature
 
-def extract_from_lexicon(ds,lexicon):
+def extract_from_lexicon1(ds,lexicon):
     vectorizer = CountVectorizer(analyzer='word', vocabulary=lexicon)
     for doc in ds:
         doc.feature = vectorizer.transform([doc.text])
@@ -46,17 +28,12 @@ def extract_from_lexicon(ds,lexicon):
     print(feature_names)
     return vectorizer
 
+def extract_from_lexicon(ds,lexicon_file):
+    vectorizer = counts_vectorizer(lexicon_file)
+    vectorizer.transform([doc.text for doc in ds])
+    return vectorizer
 
-def load_lexicon(file):
-    print('Loading lexicon from ' + file + ' ...')
-    lexicon = []
-    with codecs.open(file, 'r') as f:
-        for line in f:
-            line = line.strip()
-            lexicon.append(line)
-        f.close()
-        print('done!')
-        return lexicon
+
 
 
 print ('⎛i⎞⎛n⎞⎛i⎞⎛t⎞⎛i⎞⎛a⎞⎛ℓ⎞⎛i⎞⎛z⎞⎛i⎞⎛n⎞⎛g⎞  ...')
