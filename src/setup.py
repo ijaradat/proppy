@@ -1,6 +1,10 @@
 #!/usr/local/bin/python
+# coding: utf-8
+import os, sys
+# for Arabic encoding purposes
+reload(sys)
+sys.setdefaultencoding('utf-8')
 import codecs
-import os,sys
 #import tensorflow as tf
 #import numpy as np
 import optparse
@@ -11,7 +15,7 @@ from document import document
 from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
 from sklearn.metrics import f1_score
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, FeatureUnion
 
 
 optparser = optparse.OptionParser()
@@ -88,15 +92,57 @@ def read_datsets(param):
 
 
 def extract_features(ds):
+    global action_count_vectorizer
     print('constructing features pipeline ...')
-    tfidf_vec = extract_baseline_feature(ds) # returns a vector of tf-idf weighed doc-term matrix (vectorizer)
-    features_pipeline = Pipeline([('tf-idf', tfidf_vec)])   #Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
+    tfidf = extract_baseline_feature(ds) # each one of these is a sklearn object that has a transform method (each one is a transformer)
+    action_adverbs = extract_from_lexicon(ds,load_lexicon('../data/lexicons/act_adverbs_wik.txt'))
+    assertives= extract_from_lexicon(ds,load_lexicon('../data/lexicons/assertives_hooper1975.txt'))
+    comparatives = extract_from_lexicon(ds,load_lexicon('../data/lexicons/comparative_forms_wik.txt'))
+    first_person = extract_from_lexicon(ds,load_lexicon('../data/lexicons/firstPers_liwc.txt'))
+    hear = extract_from_lexicon(ds,load_lexicon('../data/lexicons/hear_liwc.txt'))
+    hedges = extract_from_lexicon(ds,load_lexicon('../data/lexicons/hedges_hyland2005.txt'))
+    manner_adverbs = extract_from_lexicon(ds,load_lexicon('../data/lexicons/manner_adverbs_wik.txt'))
+    modal_adverbs = extract_from_lexicon(ds,load_lexicon('../data/lexicons/modal_adverbs_wik.txt'))
+    money = extract_from_lexicon(ds,load_lexicon('../data/lexicons/money_liwc.txt'))
+    negations = extract_from_lexicon(ds,load_lexicon('../data/lexicons/negations_liwc.txt'))
+    number = extract_from_lexicon(ds,load_lexicon('../data/lexicons/number_liwc.txt'))
+    second_person = extract_from_lexicon(ds,load_lexicon('../data/lexicons/secPers_liwc.txt'))
+    see = extract_from_lexicon(ds,load_lexicon('../data/lexicons/see_liwc.txt'))
+    sexual = extract_from_lexicon(ds,load_lexicon('../data/lexicons/sexual_liwc.txt'))
+    strong_subjectives = extract_from_lexicon(ds,load_lexicon('../data/lexicons/strong_subj_wilson.txt'))
+    superlatives = extract_from_lexicon(ds,load_lexicon('../data/lexicons/superlative_forms_wik.txt'))
+    swear = extract_from_lexicon(ds,load_lexicon('../data/lexicons/swear_liwc.txt'))
+    weak_subjectives= extract_from_lexicon(ds,load_lexicon('../data/lexicons/weak_subj_wilson.txt'))
+    #features = [('tf-idf',tfidf_vec),('action',action_adverbs)]
+
+
+    features_pipeline =  FeatureUnion([
+                                        ('tf-idf', tfidf),
+                                        ('action_adverbs', action_adverbs),
+                                        ('assertives', assertives),
+                                        ('comparatives',comparatives),
+                                        ('first_person',first_person),
+                                        ('hear',hear),
+                                        ('hedges',hedges),
+                                        ('manner_adverbs',manner_adverbs),
+                                        ('modal_adverbs',modal_adverbs),
+                                        ('money',money),
+                                        ('negations',negations),
+                                        ('number',number),
+                                        ('second_person',second_person),
+                                        ('see',see),
+                                        ('sexual',sexual),
+                                        ('strong_subjectives',strong_subjectives),
+                                        ('superlatives',superlatives),
+                                        ('swear',swear),
+                                        ('weak_subjectives',weak_subjectives)
+                                        ])   #Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
 
 
 def train_model(train):
-    print ('Training phase: __________________________________________________________________________________________')
+    print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
     features_pipeline = extract_features(train)
     # dump it (to speed up exp.)
     #pickle.dump(features_pipeline, open("train_features.pickle", "wb"))
@@ -106,16 +152,16 @@ def train_model(train):
     print ('fitting the model according to given data ...')
     model.fit(X, Y)
     #pickle the model
-    joblib.dump(model, 'baseline_model.pkl')
-    print ('model pickled at : baseline_model.pkl ')
+    joblib.dump(model, 'basic_features_model.pkl')
+    print ('model pickled at : basic_features_model.pkl ')
 
 
 def test_model(test):
-    print ('Testing phase: __________________________________________________________________________________________')
+    print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
     features_pipeline= extract_features(test)
     #pickle.dump(features_pipeline, open("test_features.pickle", "wb"))
-    print('loading pickled model from : baseline_model.pkl ')
-    model = joblib.load('baseline_model.pkl') #load the pickled model
+    print('loading pickled model from : basic_features_model.pkl ')
+    model = joblib.load('basic_features_model.pkl') #load the pickled model
     X = features_pipeline.transform([doc.text for doc in test])
     print ('predicting Y for each given X in test ...')
     Y_ = model.predict(X)
