@@ -25,11 +25,11 @@ optparser.add_option(
     help="xtrain set path"
 )
 optparser.add_option(
-    "-D", "--xdev", default="../data/xdev.txt",
+    "-D", "--xdev", default="../data/xtrain.txt",
     help="xdev set path"
 )
 optparser.add_option(
-    "-t", "--test", default="../data/test.txtconverted.txt",
+    "-t", "--test", default="../data/xtrain.txt",
     help="test set path"
 )
 
@@ -91,28 +91,28 @@ def read_datsets(param):
     return xtrain,xdev,test
 
 
-def extract_features(ds):
+def extract_features(ds, feats):
     global action_count_vectorizer
     print('constructing features pipeline ...')
-    tfidf = extract_baseline_feature(ds) # each one of these is a sklearn object that has a transform method (each one is a transformer)
-    action_adverbs = extract_from_lexicon(ds,'../data/lexicons/act_adverbs_wik.txt')
-    assertives= extract_from_lexicon(ds,'../data/lexicons/assertives_hooper1975.txt')
-    comparatives = extract_from_lexicon(ds,'../data/lexicons/comparative_forms_wik.txt')
-    first_person = extract_from_lexicon(ds,'../data/lexicons/firstPers_liwc.txt')
-    hear = extract_from_lexicon(ds,'../data/lexicons/hear_liwc.txt')
-    hedges = extract_from_lexicon(ds,'../data/lexicons/hedges_hyland2005.txt')
-    manner_adverbs = extract_from_lexicon(ds,'../data/lexicons/manner_adverbs_wik.txt')
-    modal_adverbs = extract_from_lexicon(ds,'../data/lexicons/modal_adverbs_wik.txt')
-    money = extract_from_lexicon(ds,'../data/lexicons/money_liwc.txt')
-    negations = extract_from_lexicon(ds,'../data/lexicons/negations_liwc.txt')
-    number = extract_from_lexicon(ds,'../data/lexicons/number_liwc.txt')
-    second_person = extract_from_lexicon(ds,'../data/lexicons/secPers_liwc.txt')
-    see = extract_from_lexicon(ds,'../data/lexicons/see_liwc.txt')
-    sexual = extract_from_lexicon(ds,'../data/lexicons/sexual_liwc.txt')
-    strong_subjectives = extract_from_lexicon(ds,'../data/lexicons/strong_subj_wilson.txt')
-    superlatives = extract_from_lexicon(ds,'../data/lexicons/superlative_forms_wik.txt')
-    swear = extract_from_lexicon(ds,'../data/lexicons/swear_liwc.txt')
-    weak_subjectives= extract_from_lexicon(ds,'../data/lexicons/weak_subj_wilson.txt')
+    tfidf = feats.extract_baseline_feature(ds) # each one of these is a sklearn object that has a transform method (each one is a transformer)
+    action_adverbs = feats.extract_from_lexicon(ds,'../data/lexicons/act_adverbs_wik.txt')
+    assertives= feats.extract_from_lexicon(ds,'../data/lexicons/assertives_hooper1975.txt')
+    comparatives = feats.extract_from_lexicon(ds,'../data/lexicons/comparative_forms_wik.txt')
+    first_person = feats.extract_from_lexicon(ds,'../data/lexicons/firstPers_liwc.txt')
+    hear = feats.extract_from_lexicon(ds,'../data/lexicons/hear_liwc.txt')
+    hedges = feats.extract_from_lexicon(ds,'../data/lexicons/hedges_hyland2005.txt')
+    manner_adverbs = feats.extract_from_lexicon(ds,'../data/lexicons/manner_adverbs_wik.txt')
+    modal_adverbs = feats.extract_from_lexicon(ds,'../data/lexicons/modal_adverbs_wik.txt')
+    money = feats.extract_from_lexicon(ds,'../data/lexicons/money_liwc.txt')
+    negations = feats.extract_from_lexicon(ds,'../data/lexicons/negations_liwc.txt')
+    number = feats.extract_from_lexicon(ds,'../data/lexicons/number_liwc.txt')
+    second_person = feats.extract_from_lexicon(ds,'../data/lexicons/secPers_liwc.txt')
+    see = feats.extract_from_lexicon(ds,'../data/lexicons/see_liwc.txt')
+    sexual = feats.extract_from_lexicon(ds,'../data/lexicons/sexual_liwc.txt')
+    strong_subjectives = feats.extract_from_lexicon(ds,'../data/lexicons/strong_subj_wilson.txt')
+    superlatives = feats.extract_from_lexicon(ds,'../data/lexicons/superlative_forms_wik.txt')
+    swear = feats.extract_from_lexicon(ds,'../data/lexicons/swear_liwc.txt')
+    weak_subjectives= feats.extract_from_lexicon(ds,'../data/lexicons/weak_subj_wilson.txt')
     #features = [('tf-idf',tfidf_vec),('action',action_adverbs)]
 
 
@@ -138,12 +138,12 @@ def extract_features(ds):
                                         ('weak_subjectives',weak_subjectives)
                                         ])   #Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
-    return  features_pipeline
+    return features_pipeline
 
 
-def train_model(train):
+def train_model(train, feats ):
     print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
-    features_pipeline = extract_features(train)
+    features_pipeline = extract_features(train, feats)
     # dump it (to speed up exp.)
     #pickle.dump(features_pipeline, open("train_features.pickle", "wb"))
     model = LogisticRegression(penalty='l2')
@@ -156,9 +156,9 @@ def train_model(train):
     print ('model pickled at : basic_features_model.pkl ')
 
 
-def test_model(test):
+def test_model(test, feats):
     print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
-    features_pipeline= extract_features(test)
+    features_pipeline= extract_features(test, feats)
     #pickle.dump(features_pipeline, open("test_features.pickle", "wb"))
     print('loading pickled model from : basic_features_model.pkl ')
     model = joblib.load('basic_features_model.pkl') #load the pickled model
@@ -180,21 +180,23 @@ def evaluate_model(ds):
     print (score)
 
 
-def main ():
+def main():
 
     param = parse_parameters()
 
     xtrain,xdev,test = read_datsets(param)
+    feats = features(xtrain)
 
-    train_model(xtrain)
+    train_model(xtrain, feats)
 
-    tested_dev = test_model(xdev)
-    tested_test = test_model(test)
+    tested_dev = test_model(xdev, feats)
+    tested_test = test_model(test, feats)
 
     print ('evaluating the model using dev ds ...')
     evaluate_model(tested_dev)
     print ('evaluating the model using test ds ...')
     evaluate_model(tested_test)
+
 
 if __name__ == '__main__':
     main()
