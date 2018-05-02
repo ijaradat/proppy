@@ -7,7 +7,7 @@ sys.setdefaultencoding('utf-8')
 from setup import load_datset
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from counts_transformer import counts_vectorizer
-from style import LexicalStyle_vectorizer
+from readability import LexicalStyle_vectorizer
 #from sklearn.feature_extraction import DictVectorizer
 
 import functional_words
