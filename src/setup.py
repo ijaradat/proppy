@@ -114,6 +114,7 @@ def extract_features(ds, feats):
     swear = feats.extract_from_lexicon(ds,'../data/lexicons/swear_liwc.txt')
     weak_subjectives= feats.extract_from_lexicon(ds,'../data/lexicons/weak_subj_wilson.txt')
     #features = [('tf-idf',tfidf_vec),('action',action_adverbs)]
+    readability_features = feats.extract_readability_features(ds)
 
 
     features_pipeline =  FeatureUnion([
@@ -135,7 +136,8 @@ def extract_features(ds, feats):
                                         ('strong_subjectives',strong_subjectives),
                                         ('superlatives',superlatives),
                                         ('swear',swear),
-                                        ('weak_subjectives',weak_subjectives)
+                                        ('weak_subjectives',weak_subjectives),
+                                        ('readability', readability_features)
                                         ])   #Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return features_pipeline
@@ -185,7 +187,7 @@ def main():
     param = parse_parameters()
 
     xtrain,xdev,test = read_datsets(param)
-    feats = features(xtrain)
+    feats = features(param['xtrain'])
 
     train_model(xtrain, feats)
 

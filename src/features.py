@@ -7,8 +7,10 @@ sys.setdefaultencoding('utf-8')
 from setup import load_datset
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from counts_transformer import counts_vectorizer
+from style import LexicalStyle_vectorizer
 #from sklearn.feature_extraction import DictVectorizer
 
+import functional_words
 
 class features:
 
@@ -28,6 +30,14 @@ class features:
         return self.tfidf_vectorizer
 
 
+    # def extract_functional_ngrams(self, ds):
+    #     global funct_vectorizer
+    #     for doc in ds:
+    #         # text = functional_words.get_functional_words(doc.text)
+    #         doc.baseline_feature = funct_vectorizer.transform([doc.text])
+    #     return funct_vectorizer
+
+
     def extract_from_lexicon1(self, ds,lexicon):
         vectorizer = CountVectorizer(analyzer='word', vocabulary=lexicon)
         for doc in ds:
@@ -42,3 +52,30 @@ class features:
         vectorizer = counts_vectorizer(lexicon_file)
         vectorizer.transform([doc.text for doc in ds])
         return vectorizer
+
+    def extract_readability_features(self, ds):
+        vectorizer = LexicalStyle_vectorizer()
+        vectorizer.transform([doc.text for doc in ds])
+        return vectorizer
+
+
+
+
+        # funct_vectorizer = TfidfVectorizer(
+        #                         analyzer="word",
+        #                         ngram_range=(1, 3),
+        #                         preprocessor=functional_words.get_functional_words(""))
+        #     # TODO perhaps I don't need to load this twice
+        #     documents = [doc.text for doc in xtrain]
+        #     funct_vectorizer.fit_transform(documents)
+        #
+        #
+
+
+    # funct_vectorizer = TfidfVectorizer(
+    #                     analyzer="word",
+    #                     ngram_range=(1, 3),
+    #                     preprocessor=functional_words.get_functional_words(""))
+    # # TODO perhaps I don't need to load this twice
+    # documents = [doc.text for doc in xtrain]
+    # funct_vectorizer.fit_transform(documents)
