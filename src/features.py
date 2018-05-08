@@ -10,9 +10,9 @@ from counts_transformer import counts_vectorizer
 #from sklearn.feature_extraction import DictVectorizer
 
 class features:
-    def __init__(self, train="../data/xtrain.txt"):
+    def __init__(self, train):
         print ('⎛i⎞⎛n⎞⎛i⎞⎛t⎞⎛i⎞⎛a⎞⎛ℓ⎞⎛i⎞⎛z⎞⎛i⎞⎛n⎞⎛g⎞  ...')
-        self.xtrain = load_datset("../data/sample.txt")
+        self.xtrain = load_datset(train)
         self.tfidf_vectorizer = TfidfVectorizer(analyzer="word", ngram_range=(1, 3))
         self.documents = [doc.text for doc in self.xtrain]
         self.tfidf_vectorizer.fit_transform(self.documents)
