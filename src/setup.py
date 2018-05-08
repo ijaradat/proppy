@@ -16,20 +16,20 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
 from sklearn.metrics import f1_score
 from sklearn.pipeline import Pipeline, FeatureUnion
-
-
+from sklearn.ensemble import ExtraTreesClassifier
+import counts_transformer
 optparser = optparse.OptionParser()
 
 optparser.add_option(
-    "-T", "--xtrain", default="../data/xtrain.txt",
+    "-T", "--xtrain", default="../data/sample.txt", # "../data/xtrain.txt"
     help="xtrain set path"
 )
 optparser.add_option(
-    "-D", "--xdev", default="../data/xdev.txt",
+    "-D", "--xdev", default="../data/sample.txt",  #"../data/xdev.txt"
     help="xdev set path"
 )
 optparser.add_option(
-    "-t", "--test", default="../data/test.txtconverted.txt",
+    "-t", "--test", default="../data/sample.txt",  #"../data/test.txtconverted.txt"
     help="test set path"
 )
 
@@ -74,10 +74,12 @@ def load_datset(dataset_file):
     print ('loading dataset: '+dataset_file+ ' ...')
     dataset =[]
     with codecs.open(dataset_file,'r') as f:
+        i=0
         for line in f:
             fields = line.split('\t')
-            article = document(fields[1],fields[0])
+            article = document(fields[1],fields[0],i)
             dataset.append(article)
+            i+=1
         f.close()
     print ('done !')
     return dataset
@@ -92,54 +94,68 @@ def read_datsets(param):
 
 
 def extract_features(ds):
-    global action_count_vectorizer
+
     print('constructing features pipeline ...')
-    tfidf = extract_baseline_feature(ds) # each one of these is a sklearn object that has a transform method (each one is a transformer)
-    action_adverbs = extract_from_lexicon(ds,'../data/lexicons/act_adverbs_wik.txt')
-    assertives= extract_from_lexicon(ds,'../data/lexicons/assertives_hooper1975.txt')
-    comparatives = extract_from_lexicon(ds,'../data/lexicons/comparative_forms_wik.txt')
-    first_person = extract_from_lexicon(ds,'../data/lexicons/firstPers_liwc.txt')
-    hear = extract_from_lexicon(ds,'../data/lexicons/hear_liwc.txt')
-    hedges = extract_from_lexicon(ds,'../data/lexicons/hedges_hyland2005.txt')
-    manner_adverbs = extract_from_lexicon(ds,'../data/lexicons/manner_adverbs_wik.txt')
-    modal_adverbs = extract_from_lexicon(ds,'../data/lexicons/modal_adverbs_wik.txt')
-    money = extract_from_lexicon(ds,'../data/lexicons/money_liwc.txt')
-    negations = extract_from_lexicon(ds,'../data/lexicons/negations_liwc.txt')
-    number = extract_from_lexicon(ds,'../data/lexicons/number_liwc.txt')
-    second_person = extract_from_lexicon(ds,'../data/lexicons/secPers_liwc.txt')
-    see = extract_from_lexicon(ds,'../data/lexicons/see_liwc.txt')
-    sexual = extract_from_lexicon(ds,'../data/lexicons/sexual_liwc.txt')
-    strong_subjectives = extract_from_lexicon(ds,'../data/lexicons/strong_subj_wilson.txt')
-    superlatives = extract_from_lexicon(ds,'../data/lexicons/superlative_forms_wik.txt')
-    swear = extract_from_lexicon(ds,'../data/lexicons/swear_liwc.txt')
-    weak_subjectives= extract_from_lexicon(ds,'../data/lexicons/weak_subj_wilson.txt')
-    #features = [('tf-idf',tfidf_vec),('action',action_adverbs)]
+    global lexicons
+    tfidf = extract_baseline_feature(ds)  # each one of these is a sklearn object that has a transform method (each one is a transformer)
+    lexical = extract_lexical(ds, lexicons)
+    # action_adverbs = extract_from_lexicon(ds,'../data/lexicons/act_adverbs_wik.txt')
+    # assertives= extract_from_lexicon(ds,'../data/lexicons/assertives_hooper1975.txt')
+    # comparatives = extract_from_lexicon(ds,'../data/lexicons/comparative_forms_wik.txt')
+    # first_person = extract_from_lexicon(ds,'../data/lexicons/firstPers_liwc.txt')
+    # hear = extract_from_lexicon(ds,'../data/lexicons/hear_liwc.txt')
+    # hedges = extract_from_lexicon(ds,'../data/lexicons/hedges_hyland2005.txt')
+    # manner_adverbs = extract_from_lexicon(ds,'../data/lexicons/manner_adverbs_wik.txt')
+    # modal_adverbs = extract_from_lexicon(ds,'../data/lexicons/modal_adverbs_wik.txt')
+    # money = extract_from_lexicon(ds,'../data/lexicons/money_liwc.txt')
+    # negations = extract_from_lexicon(ds,'../data/lexicons/negations_liwc.txt')
+    # number = extract_from_lexicon(ds,'../data/lexicons/number_liwc.txt')
+    # second_person = extract_from_lexicon(ds,'../data/lexicons/secPers_liwc.txt')
+    # see = extract_from_lexicon(ds,'../data/lexicons/see_liwc.txt')
+    # sexual = extract_from_lexicon(ds,'../data/lexicons/sexual_liwc.txt')
+    # strong_subjectives = extract_from_lexicon(ds,'../data/lexicons/strong_subj_wilson.txt')
+    # superlatives = extract_from_lexicon(ds,'../data/lexicons/superlative_forms_wik.txt')
+    # swear = extract_from_lexicon(ds,'../data/lexicons/swear_liwc.txt')
+    # weak_subjectives= extract_from_lexicon(ds,'../data/lexicons/weak_subj_wilson.txt')
 
 
-    features_pipeline =  FeatureUnion([
-                                        ('tf-idf', tfidf),
-                                        ('action_adverbs', action_adverbs),
-                                        ('assertives', assertives),
-                                        ('comparatives',comparatives),
-                                        ('first_person',first_person),
-                                        ('hear',hear),
-                                        ('hedges',hedges),
-                                        ('manner_adverbs',manner_adverbs),
-                                        ('modal_adverbs',modal_adverbs),
-                                        ('money',money),
-                                        ('negations',negations),
-                                        ('number',number),
-                                        ('second_person',second_person),
-                                        ('see',see),
-                                        ('sexual',sexual),
-                                        ('strong_subjectives',strong_subjectives),
-                                        ('superlatives',superlatives),
-                                        ('swear',swear),
-                                        ('weak_subjectives',weak_subjectives)
-                                        ])   #Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
+
+    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
+                                        ('lexical', lexical)
+                                        # ('action_adverbs', action_adverbs),
+                                        # ('assertives', assertives),
+                                        # ('comparatives',comparatives),
+                                        # ('first_person',first_person),
+                                        # ('hear',hear),
+                                        # ('hedges',hedges),
+                                        # ('manner_adverbs',manner_adverbs),
+                                        # ('modal_adverbs',modal_adverbs),
+                                        # ('money',money),
+                                        # ('negations',negations),
+                                        # ('number',number),
+                                        # ('second_person',second_person),
+                                        # ('see',see),
+                                        # ('sexual',sexual),
+                                        # ('strong_subjectives',strong_subjectives),
+                                        # ('superlatives',superlatives),
+                                        # ('swear',swear),
+                                        # ('weak_subjectives',weak_subjectives)
+                                        ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
 
+def select_features(train):
+    print ('████████████████  FEATURE SELECTION  ████████████████')
+    global lexicons
+    vectorizer = counts_vectorizer(lexicons)
+    dataset_data = vectorizer.transform([doc.text for doc in train])
+    dataset_target = [doc.gold_label for doc in train]
+    model = ExtraTreesClassifier()
+    model.fit(dataset_data, dataset_target)
+    # display the relative importance of each attribute
+    print (vectorizer.feature_names)
+    print(model.feature_importances_)
+    print ()
 
 def train_model(train):
     print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
@@ -185,6 +201,8 @@ def main ():
     param = parse_parameters()
 
     xtrain,xdev,test = read_datsets(param)
+
+    select_features(xtrain)
 
     train_model(xtrain)
 

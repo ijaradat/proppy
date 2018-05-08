@@ -5,15 +5,22 @@ import numpy as np
 import codecs
 
 class counts_vectorizer(TransformerMixin):
-    def __init__(self,lexicon_file):
-        self.lexicon = self.load_lexicon(lexicon_file)
-
+    def __init__(self,lexicons):
+        self.lexicons =[]
+        for lexicon in lexicons:
+            self.lexicons.append(self.load_lexicon(lexicon))
+        self.feature_names = ['action_adverbs','assertives','comparatives','first_person','hear','hedges','manner_adverbs','modal_adverbs','money','negations','number','second_person','see','sexual','strong_subjective','superlatives','swear','weak_subjective']
     def transform(self,X):
         counts = []
+        vects =[]
+
         for doc in X:
-            counts.append(self.extract_lexical_counts(doc,self.lexicon))
-        vect = np.array(counts).reshape(-1,1)
-        return vect
+            for lexicon in self.lexicons:
+                counts.append(self.extract_lexical_counts(doc,lexicon))
+            vects.append([counts])
+            counts = []
+        matrix = np.array(vects).reshape(len(X),len(self.lexicons))
+        return matrix
 
 
     def fit(self):
