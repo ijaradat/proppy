@@ -7,7 +7,8 @@ sys.setdefaultencoding('utf-8')
 from setup import load_datset
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from counts_transformer import counts_vectorizer
-#from sklearn.feature_extraction import DictVectorizer
+from readability import LexicalStyle_vectorizer
+
 
 class features:
     def __init__(self, train):
@@ -28,26 +29,30 @@ class features:
                     '../data/lexicons/swear_liwc.txt', '../data/lexicons/weak_subj_wilson.txt']
 
     def extract_baseline_feature(self,ds):
-        for doc in ds:
-            doc.baseline_feature = self.tfidf_vectorizer.transform([doc.text])
+        #for doc in ds:
+        #    doc.baseline_feature = self.tfidf_vectorizer.transform([doc.text])
         return self.tfidf_vectorizer
 
 
     def extract_from_lexicon1(self,ds,lexicon):
         vectorizer = CountVectorizer(analyzer='word', vocabulary=lexicon)
-        for doc in ds:
-            doc.feature = vectorizer.transform([doc.text])
+        #for doc in ds:
+        #    doc.feature = vectorizer.transform([doc.text])
         feature_names = vectorizer.get_feature_names()
         print(feature_names)
         return vectorizer
 
     def extract_from_lexicon(self,ds,lexicon_file):
         vectorizer = counts_vectorizer(lexicon_file)
-        vectorizer.transform([doc.text for doc in ds])
+        #vectorizer.transform([doc.text for doc in ds])
         return vectorizer
 
     def extract_lexical(self,ds):
         vectorizer = counts_vectorizer(self.lexicons)
-        vectorizer.transform([doc.text for doc in ds])
+        #vectorizer.transform([doc.text for doc in ds])
         return vectorizer
 
+    def extract_readability_features(self, ds):
+        vectorizer = LexicalStyle_vectorizer()
+        #vectorizer.transform([doc.text for doc in ds])
+        return vectorizer

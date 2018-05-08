@@ -98,6 +98,7 @@ def extract_features(ds, feats):
     print('constructing features pipeline ...')
     tfidf = feats.extract_baseline_feature(ds)  # each one of these is a sklearn object that has a transform method (each one is a transformer)
     lexical = feats.extract_lexical(ds)
+    readability_features = feats.extract_readability_features(ds)
     # action_adverbs = extract_from_lexicon(ds,'../data/lexicons/act_adverbs_wik.txt')
     # assertives= extract_from_lexicon(ds,'../data/lexicons/assertives_hooper1975.txt')
     # comparatives = extract_from_lexicon(ds,'../data/lexicons/comparative_forms_wik.txt')
@@ -120,7 +121,8 @@ def extract_features(ds, feats):
 
 
     features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical)
+                                        ('lexical', lexical),
+                                        ('readability', readability_features)
                                         # ('action_adverbs', action_adverbs),
                                         # ('assertives', assertives),
                                         # ('comparatives',comparatives),
