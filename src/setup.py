@@ -93,12 +93,11 @@ def read_datsets(param):
     return xtrain,xdev,test
 
 
-def extract_features(ds):
+def extract_features(ds, feats):
 
     print('constructing features pipeline ...')
-    global lexicons
-    tfidf = extract_baseline_feature(ds)  # each one of these is a sklearn object that has a transform method (each one is a transformer)
-    lexical = extract_lexical(ds, lexicons)
+    tfidf = feats.extract_baseline_feature(ds)  # each one of these is a sklearn object that has a transform method (each one is a transformer)
+    lexical = feats.extract_lexical(ds)
     # action_adverbs = extract_from_lexicon(ds,'../data/lexicons/act_adverbs_wik.txt')
     # assertives= extract_from_lexicon(ds,'../data/lexicons/assertives_hooper1975.txt')
     # comparatives = extract_from_lexicon(ds,'../data/lexicons/comparative_forms_wik.txt')
@@ -144,10 +143,9 @@ def extract_features(ds):
     print ('features pipeline ready !')
     return  features_pipeline
 
-def select_features(train):
+def select_features(train, feats):
     print ('████████████████  FEATURE SELECTION  ████████████████')
-    global lexicons
-    vectorizer = counts_vectorizer(lexicons)
+    vectorizer = counts_vectorizer(feats.lexicons)
     dataset_data = vectorizer.transform([doc.text for doc in train])
     dataset_target = [doc.gold_label for doc in train]
     model = ExtraTreesClassifier()
@@ -157,9 +155,9 @@ def select_features(train):
     print(model.feature_importances_)
     print ()
 
-def train_model(train):
+def train_model(train, feats):
     print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
-    features_pipeline = extract_features(train)
+    features_pipeline = extract_features(train, feats)
     # dump it (to speed up exp.)
     #pickle.dump(features_pipeline, open("train_features.pickle", "wb"))
     model = LogisticRegression(penalty='l2')
@@ -172,9 +170,9 @@ def train_model(train):
     print ('model pickled at : basic_features_model.pkl ')
 
 
-def test_model(test):
+def test_model(test, feats):
     print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
-    features_pipeline= extract_features(test)
+    features_pipeline= extract_features(test, feats)
     #pickle.dump(features_pipeline, open("test_features.pickle", "wb"))
     print('loading pickled model from : basic_features_model.pkl ')
     model = joblib.load('basic_features_model.pkl') #load the pickled model
@@ -201,13 +199,13 @@ def main ():
     param = parse_parameters()
 
     xtrain,xdev,test = read_datsets(param)
+    feats = features(param['xtrain'])
+    select_features(xtrain, feats)
 
-    select_features(xtrain)
+    train_model(xtrain, feats)
 
-    train_model(xtrain)
-
-    tested_dev = test_model(xdev)
-    tested_test = test_model(test)
+    tested_dev = test_model(xdev, feats)
+    tested_test = test_model(test, feats)
 
     print ('evaluating the model using dev ds ...')
     evaluate_model(tested_dev)
