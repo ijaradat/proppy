@@ -1,9 +1,19 @@
 
-from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.base import TransformerMixin
 from nltk.tokenize import word_tokenize
 import numpy as np
 import codecs
 
+
+# finds the number of lexical occurences for each lexicon
+# final output (return value ) will look like:
+#________________________________________________________________________
+# doc   occurences from:  lexicon1   lexicon2   lexicon3 , .....
+# doc1                    12         2          0
+# doc2                    0          5          20
+# doc3                    4          2          0
+# ...
+#________________________________________________________________________
 class counts_vectorizer(TransformerMixin):
     def __init__(self,lexicons):
         self.lexicons =[]
