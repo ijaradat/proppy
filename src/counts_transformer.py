@@ -5,6 +5,8 @@ import numpy as np
 import codecs
 
 
+# this is a custom transformer that does the following:
+
 # finds the number of lexical occurences for each lexicon
 # final output (return value ) will look like:
 #________________________________________________________________________
@@ -14,7 +16,7 @@ import codecs
 # doc3                    4          2          0
 # ...
 #________________________________________________________________________
-class counts_vectorizer(TransformerMixin):
+class counts_vectorizer(TransformerMixin): # any custom transformer needs to inherit sklearn transformMixin or any python class that implements .fit method
     def __init__(self,lexicons):
         self.lexicons =[]
         for lexicon in lexicons:

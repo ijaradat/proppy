@@ -17,7 +17,10 @@ from sklearn.externals import joblib
 from sklearn.metrics import f1_score
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import ExtraTreesClassifier
-import counts_transformer
+
+
+
+
 optparser = optparse.OptionParser()
 
 optparser.add_option(
@@ -91,7 +94,7 @@ def extract_features(ds, feats):
     lexical = feats.extract_lexical(ds)
     readability_features = feats.extract_readability_features(ds)
 
-
+    # feature union is used from the sklearn pipeline class to concatenate features
     features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
                                         ('lexical', lexical),
                                         ('readability', readability_features)
