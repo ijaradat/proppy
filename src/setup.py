@@ -6,7 +6,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 import codecs
 #import tensorflow as tf
-#import numpy as np
+import numpy as np
 import optparse
 import pickle
 from collections import OrderedDict
@@ -90,14 +90,14 @@ def read_datsets(param):
 def extract_features(ds, feats):
 
     print('constructing features pipeline ...')
-    tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
+    #tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
     lexical = feats.extract_lexical(ds)
-    readability_features = feats.extract_readability_features(ds)
+    #readability_features = feats.extract_readability_features(ds)
 
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical),
-                                        ('readability', readability_features)
+    features_pipeline =  FeatureUnion([ #('tf-idf',tfidf),
+                                        ('lexical', lexical)
+                                        #('readability', readability_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
@@ -126,6 +126,13 @@ def train_model(train, feats):
 
     joblib.dump(model, 'basic_features_model.pkl') #pickle the model
     print ('model pickled at : basic_features_model.pkl ')
+
+    print ('features importance :')
+    coefs = model.coef_[0]
+    for i, feature in enumerate(features_pipeline.get_feature_names()):
+        print feature
+        print coefs[i]
+        i+=1
 
 
 def test_model(test, feats):
@@ -159,7 +166,7 @@ def main ():
 
     xtrain,xdev,test = read_datsets(param) # loading datsets as lists of document objects
     feats = features(param['xtrain'])  # creating an object from the class features to initialize important global variables such as lexicons and training ds
-    select_features(xtrain, feats)  # feature selection and importance
+    #select_features(xtrain, feats)  # feature selection and importance
 
     train_model(xtrain, feats)  # training the model
 

@@ -42,6 +42,9 @@ class counts_vectorizer(TransformerMixin): # any custom transformer needs to inh
         self.fit()
         return self.transform(X)
 
+    def get_feature_names(self):
+        return self.feature_names
+
     def extract_lexical_counts(self,doc, lexicon):
         tokens = word_tokenize(doc.lower())
         count = 0
