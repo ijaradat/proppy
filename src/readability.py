@@ -63,8 +63,9 @@ class LexicalStyle_vectorizer(TransformerMixin):
 
         # Counting the number of types appearing i times for all i
         counter_all = {}
-        for i in range(1, max(type_freqs.values())):
-            counter_all[i] = sum([1 for x in type_freqs if type_freqs[x] == i])
+        for i in range(1, max(type_freqs.values())+1):
+            counter_all[i] = 0
+            counter_all[i] += sum([1 for x in type_freqs if type_freqs[x] == i])
 
         # hapax_legomena_count = sum([1 for x in type_freqs if type_freqs[x] == 1])
         # hapax_dislegomena_count = sum([1 for x in type_freqs if type_freqs[x] == 2])
@@ -98,6 +99,7 @@ class LexicalStyle_vectorizer(TransformerMixin):
         """
         We compute the number of hapax_legomena and normalize by the
         number of types.
+
         :return: number of types appearing only once in the text (normalized)
         """
         try:
@@ -109,6 +111,7 @@ class LexicalStyle_vectorizer(TransformerMixin):
         """
         We compute the number of hapax_dislegomena and normalize by the
         number of types.
+
         :return: number of types appearing twice in the text (normalized)
         """
 
@@ -123,6 +126,7 @@ class LexicalStyle_vectorizer(TransformerMixin):
         The higher the value of R, the richer the vocabulary. According
         to [1] Honoré considers that |tokens| should be 1300 for the
         computation to stabilize.
+
         [1] https://www.physics.smu.edu/pseudo/ScienceReligion/MormonStylometric.pdf
         :return:
         """
