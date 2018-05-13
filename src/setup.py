@@ -5,10 +5,9 @@ import os, sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 import codecs
-#import tensorflow as tf
-import numpy as np
+#import numpy as np
 import optparse
-import pickle
+#import pickle
 from collections import OrderedDict
 from features import *
 from document import document
@@ -17,22 +16,22 @@ from sklearn.externals import joblib
 from sklearn.metrics import f1_score
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import ExtraTreesClassifier
-
+import json
 
 
 
 optparser = optparse.OptionParser()
 
 optparser.add_option(
-    "-T", "--xtrain", default="../data/sample.txt", # "../data/xtrain.txt"
+    "-T", "--xtrain", default="../data/train.json", # "../data/xtrain.txt"
     help="xtrain set path"
 )
 optparser.add_option(
-    "-D", "--xdev", default="../data/sample.txt",  #"../data/xdev.txt"
+    "-D", "--xdev", default="../data/dev.json",  #"../data/xdev.txt"
     help="xdev set path"
 )
 optparser.add_option(
-    "-t", "--test", default="../data/sample.txt",  #"../data/test.txtconverted.txt"
+    "-t", "--test", default="../data/test.json",  #"../data/test.txtconverted.txt"
     help="test set path"
 )
 
@@ -63,6 +62,15 @@ def parse_parameters():
 
     return param
 
+def load_json_dataset (dataset_file):
+    print ('loading dataset: ' + dataset_file + ' ...')
+    dataset = []
+    ds = json.load(open(dataset_file))
+    for i, item in enumerate(ds):
+        article = document(item['html_text'], item['propaganda_label'], i)
+        dataset.append(article)
+    print ('dataset loaded !')
+    return dataset
 
 def load_datset(dataset_file):
     print ('loading dataset: '+dataset_file+ ' ...')
@@ -75,14 +83,14 @@ def load_datset(dataset_file):
             dataset.append(article)
             i+=1
         f.close()
-    print ('done !')
+    print ('dataset loaded !')
     return dataset
 
 def read_datsets(param):
     print ('reading datasets ...')
-    xtrain = load_datset(param['xtrain'])
-    xdev = load_datset(param['xdev'])
-    test = load_datset(param['test'])
+    xtrain = load_json_dataset(param['xtrain'])
+    xdev = load_json_dataset(param['xdev'])
+    test = load_json_dataset(param['test'])
     print ('done reading data !')
     return xtrain,xdev,test
 
@@ -90,12 +98,12 @@ def read_datsets(param):
 def extract_features(ds, feats):
 
     print('constructing features pipeline ...')
-    #tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
+    tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
     lexical = feats.extract_lexical(ds)
     #readability_features = feats.extract_readability_features(ds)
 
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ #('tf-idf',tfidf),
+    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
                                         ('lexical', lexical)
                                         #('readability', readability_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
@@ -111,7 +119,7 @@ def select_features(train, feats):
     model.fit(dataset_data, dataset_target)
     print (vectorizer.feature_names)
     print(model.feature_importances_)  # display the relative importance of each attribute
-    print ()
+
 
 def train_model(train, feats):
     print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
