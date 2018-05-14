@@ -88,12 +88,12 @@ def load_dataset(dataset_file):
 
 def read_datsets(param):
     print ('reading datasets ...')
-    if param['train'].endswith('.json'):
+    if param['xtrain'].endswith('.json'):
         xtrain = load_json_dataset(param['xtrain'])
     else:
         xtrain = load_dataset(param['xtrain'])
 
-    if param['dev'].endswith('.json'):
+    if param['xdev'].endswith('.json'):
         xdev = load_json_dataset(param['xdev'])
     else:
         xdev = load_dataset(param['xdev'])
