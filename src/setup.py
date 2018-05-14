@@ -23,15 +23,15 @@ import json
 optparser = optparse.OptionParser()
 
 optparser.add_option(
-    "-T", "--xtrain", default="../data/train.json", # "../data/xtrain.txt"
+    "-T", "--xtrain", default="../data/xtrain.txt", # "../data/xtrain.txt"
     help="xtrain set path"
 )
 optparser.add_option(
-    "-D", "--xdev", default="../data/dev.json",  #"../data/xdev.txt"
+    "-D", "--xdev", default="../data/xdev.txt",  #"../data/xdev.txt"
     help="xdev set path"
 )
 optparser.add_option(
-    "-t", "--test", default="../data/test.json",  #"../data/test.txtconverted.txt"
+    "-t", "--test", default="../data/test.txtconverted.txt",  #"../data/test.txtconverted.txt"
     help="test set path"
 )
 
@@ -72,7 +72,7 @@ def load_json_dataset (dataset_file):
     print ('dataset loaded !')
     return dataset
 
-def load_datset(dataset_file):
+def load_dataset(dataset_file):
     print ('loading dataset: '+dataset_file+ ' ...')
     dataset =[]
     with codecs.open(dataset_file,'r') as f:
@@ -88,9 +88,21 @@ def load_datset(dataset_file):
 
 def read_datsets(param):
     print ('reading datasets ...')
-    xtrain = load_json_dataset(param['xtrain'])
-    xdev = load_json_dataset(param['xdev'])
-    test = load_json_dataset(param['test'])
+    if param['train'].endswith('.json'):
+        xtrain = load_json_dataset(param['xtrain'])
+    else:
+        xtrain = load_dataset(param['xtrain'])
+
+    if param['dev'].endswith('.json'):
+        xdev = load_json_dataset(param['xdev'])
+    else:
+        xdev = load_dataset(param['xdev'])
+
+    if param['test'].endswith('.json'):
+        test = load_json_dataset(param['test'])
+    else:
+        test = load_dataset(param['test'])
+
     print ('done reading data !')
     return xtrain,xdev,test
 
@@ -100,12 +112,12 @@ def extract_features(ds, feats):
     print('constructing features pipeline ...')
     tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
     lexical = feats.extract_lexical(ds)
-    #readability_features = feats.extract_readability_features(ds)
+    readability_features = feats.extract_readability_features(ds)
 
     # feature union is used from the sklearn pipeline class to concatenate features
     features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical)
-                                        #('readability', readability_features)
+                                        ('lexical', lexical),
+                                        ('readability', readability_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
