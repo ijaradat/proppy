@@ -15,6 +15,7 @@ class LexicalStyle_vectorizer(TransformerMixin):
         None
         # self.text = text
         # self._process_text(text)
+        self.feature_names=["ttr", "hapax_legomena", "hapax_dislegomena", "honore_R", "yule_K"]
 
     def transform(self, X):
         # COMPUTE THE FEATURES
@@ -31,7 +32,7 @@ class LexicalStyle_vectorizer(TransformerMixin):
                            self.yule_K()])
         # return transformations (value for each documen).
         # (16,000 array for training)
-        print(counts)
+        # print(counts)
         vect = np.array(counts)#.reshape(-1,1)
         print('done')
         return vect
@@ -43,6 +44,8 @@ class LexicalStyle_vectorizer(TransformerMixin):
         self.fit()
         return self.transform(X)
 
+    def get_feature_names(self):
+        return self.feature_names
 
     def _process_text(self, text):
         """
@@ -63,8 +66,8 @@ class LexicalStyle_vectorizer(TransformerMixin):
 
         # Counting the number of types appearing i times for all i
         counter_all = {}
-        for i in range(1, max(type_freqs.values())+1):
-            counter_all[i] = 0
+        for i in range(1, max(max(type_freqs.values()) + 1, 3) ):
+            counter_all[i] = 0.0
             counter_all[i] += sum([1 for x in type_freqs if type_freqs[x] == i])
 
         # hapax_legomena_count = sum([1 for x in type_freqs if type_freqs[x] == 1])
@@ -72,9 +75,10 @@ class LexicalStyle_vectorizer(TransformerMixin):
 
         # count_tokens = len(tokens)
         # count_types = len(set)
+        # print(text)
         self.counter = {
-            'tokens': len(tokens),
-            'types': len(type_freqs),
+            'tokens': float(len(tokens)),
+            'types': float(len(type_freqs)),
             'hapax_legomena': counter_all[1],   #    hapax_legomena_count,
             'hapax_dislegomena': counter_all[2], #hapax_dislegomena_count
             'all': counter_all
@@ -130,7 +134,12 @@ class LexicalStyle_vectorizer(TransformerMixin):
         [1] https://www.physics.smu.edu/pseudo/ScienceReligion/MormonStylometric.pdf
         :return:
         """
-        return 100 * math.log(self.counter['tokens']) / (1 - (self.counter['hapax_legomena'] / self.counter['types']))
+        try:
+            return 100 * math.log(self.counter['tokens']) / (
+                    1 - (self.counter['hapax_legomena'] / self.counter['types']))
+        except ZeroDivisionError:
+            return 0
+
 
     def yule_K(self):
         """
