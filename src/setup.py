@@ -7,7 +7,7 @@ sys.setdefaultencoding('utf-8')
 import codecs
 #import numpy as np
 import optparse
-#import pickle
+import pickle
 from collections import OrderedDict
 from features import *
 from document import document
@@ -112,12 +112,12 @@ def extract_features(ds, feats):
     print('constructing features pipeline ...')
     tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
     lexical = feats.extract_lexical(ds)
-    readability_features = feats.extract_readability_features(ds)
+    # readability_features = feats.extract_readability_features(ds)
 
     # feature union is used from the sklearn pipeline class to concatenate features
     features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical),
-                                        ('readability', readability_features)
+                                        ('lexical', lexical)
+                                        # ('readability', readability_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
@@ -139,8 +139,12 @@ def train_model(train, feats):
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
     #pickle.dump(features_pipeline, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
     model = LogisticRegression(penalty='l2') # creating an object from the max entropy with L2 regulariation
+    print "Computing features"
     X = features_pipeline.transform([doc.text for doc in train]) # calling transform method of each transformer in the features pipeline to transform data into vectors of features
+    pickle.dump(X, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
+    print "Saving features to file"
     Y = [doc.gold_label for doc in train]
+    pickle.dump(Y, open("train_gold.pickle", "wb"))  # dump it (to speed up exp.)
     print ('fitting the model according to given data ...')
     model.fit(X, Y)
 
@@ -149,11 +153,12 @@ def train_model(train, feats):
 
     print ('features importance :')
     coefs = model.coef_[0]
-    for i, feature in enumerate(features_pipeline.get_feature_names()):
-        print feature
-        print coefs[i]
-        i+=1
-
+    feature_list = sorted([ (coefs[i], feature) for i, feature in enumerate(features_pipeline.get_feature_names()) ])
+    joblib.dump(feature_list, 'basic_features_mvf.pkl')
+    # for i, feature in enumerate(features_pipeline.get_feature_names()):
+    #     print feature
+    #     print coefs[i]
+    #     i+=1
 
 def test_model(test, feats):
     print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
@@ -163,9 +168,9 @@ def test_model(test, feats):
     print('loading pickled model from : basic_features_model.pkl ')
     model = joblib.load('basic_features_model.pkl') #load the pickled model
     X = features_pipeline.transform([doc.text for doc in test])  # calling transform method of each transformer in the features pipeline to transform data into vectors of features
+    pickle.dump(X, open("test_features.pickle", "wb"))  # dump it (to speed up exp.)
     print ('predicting Y for each given X in test ...')
     Y_ = model.predict(X)  # predicting the labels in this ds via the trained model loaded in the variable 'model'
-
     for i, doc in enumerate(test):
         doc.prediction  = Y_[i]
     return test
