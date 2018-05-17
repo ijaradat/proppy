@@ -7,8 +7,7 @@ sys.setdefaultencoding('utf-8')
 from setup import load_dataset, load_json_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from counts_transformer import counts_vectorizer
-from readability import LexicalStyle_vectorizer
-
+from readability import LexicalStyle_vectorizer, Readability_vectorizer
 
 class features:
     def __init__(self, train):
@@ -49,7 +48,11 @@ class features:
         #vectorizer.transform([doc.text for doc in ds])
         return vectorizer
 
-    def extract_readability_features(self, ds):
+    def extract_lexicalstyle_features(self, ds):
         vectorizer = LexicalStyle_vectorizer()
         #vectorizer.transform([doc.text for doc in ds])
+        return vectorizer
+
+    def extract_readability_features(self, ds):
+        vectorizer = Readability_vectorizer()
         return vectorizer

@@ -112,12 +112,14 @@ def extract_features(ds, feats):
     print('constructing features pipeline ...')
     tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
     lexical = feats.extract_lexical(ds)
-    # readability_features = feats.extract_readability_features(ds)
+    lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
+    readability_features = feats.extract_readability_features(ds)
 
     # feature union is used from the sklearn pipeline class to concatenate features
     features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical)
-                                        # ('readability', readability_features)
+                                        ('lexical', lexical),
+                                        ('lexicalstyle', lexicalstyle_features),
+                                        ('readability', readability_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
