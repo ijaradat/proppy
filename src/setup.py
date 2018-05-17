@@ -146,9 +146,9 @@ def train_model(train, feats):
     print ('maximum absolute values :')
     max_vals = np.amax(X, axis=0) # get the max absolute value of each feature from all data examples
     print (max_vals)
-    print (max_vals[np.argsort(max_vals)[-10:]])  # get the 10 max values from the list of max abs value of each feature above
+    #print (max_vals[np.argsort(max_vals)[-10:]])  # get the 10 max values from the list of max abs value of each feature above
     pickle.dump(X, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
-    X = pickle.load('train_features.pickle')
+    #X = pickle.load('train_features.pickle')
     print "Saving features to file"
     Y = [doc.gold_label for doc in train]
     pickle.dump(Y, open("train_gold.pickle", "wb"))  # dump it (to speed up exp.)
@@ -176,9 +176,9 @@ def test_model(test, feats):
     print ('maximum absolute values :')
     max_vals = np.amax(X, axis=0)
     print (max_vals)
-    print (max_vals[np.argsort(max_vals)[-10:]])
+    #print (max_vals[np.argsort(max_vals)[-10:]])
     pickle.dump(X, open("test_features.pickle", "wb"))  # dump it (to speed up exp.)
-    X = pickle.load('test_features.pickle')
+    #X = pickle.load('test_features.pickle')
     print ('predicting Y for each given X in test ...')
     Y_ = model.predict(X)  # predicting the labels in this ds via the trained model loaded in the variable 'model'
     for i, doc in enumerate(test):
