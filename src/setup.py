@@ -5,7 +5,7 @@ import os, sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 import codecs
-#import numpy as np
+import numpy as np
 import optparse
 import pickle
 from collections import OrderedDict
@@ -15,11 +15,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
 from sklearn.metrics import f1_score
 from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.preprocessing import MaxAbsScaler
 from sklearn.ensemble import ExtraTreesClassifier
 import json
 
 
-
+maxabs_scaler = MaxAbsScaler()
 optparser = optparse.OptionParser()
 
 optparser.add_option(
@@ -112,12 +113,12 @@ def extract_features(ds, feats):
     print('constructing features pipeline ...')
     tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
     lexical = feats.extract_lexical(ds)
-    # readability_features = feats.extract_readability_features(ds)
+    readability_features = feats.extract_readability_features(ds)
 
     # feature union is used from the sklearn pipeline class to concatenate features
     features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical)
-                                        # ('readability', readability_features)
+                                        ('lexical', lexical),
+                                        ('readability', readability_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
@@ -137,38 +138,47 @@ def train_model(train, feats):
     print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
     features_pipeline = extract_features(train, feats) # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
-    #pickle.dump(features_pipeline, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
+
     model = LogisticRegression(penalty='l2') # creating an object from the max entropy with L2 regulariation
     print "Computing features"
     X = features_pipeline.transform([doc.text for doc in train]) # calling transform method of each transformer in the features pipeline to transform data into vectors of features
+    X = maxabs_scaler.fit_transform(X)
+    print ('maximum absolute values :')
+    max_vals = np.amax(X, axis=0) # get the max absolute value of each feature from all data examples
+    print (max_vals)
+    print (max_vals[np.argsort(max_vals)[-10:]])  # get the 10 max values from the list of max abs value of each feature above
     pickle.dump(X, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
+    X = pickle.load('train_features.pickle')
     print "Saving features to file"
     Y = [doc.gold_label for doc in train]
     pickle.dump(Y, open("train_gold.pickle", "wb"))  # dump it (to speed up exp.)
     print ('fitting the model according to given data ...')
     model.fit(X, Y)
 
-    joblib.dump(model, 'basic_features_model.pkl') #pickle the model
-    print ('model pickled at : basic_features_model.pkl ')
+    joblib.dump(model, 'maxentr_model.pkl') #pickle the model
+    print ('model pickled at : maxentr_model.pkl ')
 
     print ('features importance :')
     coefs = model.coef_[0]
     feature_list = sorted([ (coefs[i], feature) for i, feature in enumerate(features_pipeline.get_feature_names()) ])
     joblib.dump(feature_list, 'basic_features_mvf.pkl')
-    # for i, feature in enumerate(features_pipeline.get_feature_names()):
-    #     print feature
-    #     print coefs[i]
-    #     i+=1
+
+
 
 def test_model(test, feats):
     print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
     features_pipeline= extract_features(test, feats)  # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
-    #pickle.dump(features_pipeline, open("test_features.pickle", "wb"))
-    print('loading pickled model from : basic_features_model.pkl ')
-    model = joblib.load('basic_features_model.pkl') #load the pickled model
+    print('loading pickled model from : maxentr_model.pkl ')
+    model = joblib.load('maxentr_model.pkl') #load the pickled model
     X = features_pipeline.transform([doc.text for doc in test])  # calling transform method of each transformer in the features pipeline to transform data into vectors of features
+    X = maxabs_scaler.transform(X)
+    print ('maximum absolute values :')
+    max_vals = np.amax(X, axis=0)
+    print (max_vals)
+    print (max_vals[np.argsort(max_vals)[-10:]])
     pickle.dump(X, open("test_features.pickle", "wb"))  # dump it (to speed up exp.)
+    X = pickle.load('test_features.pickle')
     print ('predicting Y for each given X in test ...')
     Y_ = model.predict(X)  # predicting the labels in this ds via the trained model loaded in the variable 'model'
     for i, doc in enumerate(test):
@@ -190,7 +200,7 @@ def main ():
     param = parse_parameters() # get parameters from command
 
     xtrain,xdev,test = read_datsets(param) # loading datsets as lists of document objects
-    feats = features(param['xtrain'])  # creating an object from the class features to initialize important global variables such as lexicons and training ds
+    feats = features(xtrain)  # creating an object from the class features to initialize important global variables such as lexicons and training ds
     #select_features(xtrain, feats)  # feature selection and importance
 
     train_model(xtrain, feats)  # training the model

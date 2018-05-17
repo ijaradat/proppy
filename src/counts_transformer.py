@@ -60,7 +60,6 @@ class counts_vectorizer(TransformerMixin): # any custom transformer needs to inh
                 line = line.strip()
                 lexicon.append(line)
             f.close()
-            print('done!')
             return lexicon
 
 

@@ -13,7 +13,7 @@ from readability import LexicalStyle_vectorizer
 class features:
     def __init__(self, train):
         print ('⎛i⎞⎛n⎞⎛i⎞⎛t⎞⎛i⎞⎛a⎞⎛ℓ⎞⎛i⎞⎛z⎞⎛i⎞⎛n⎞⎛g⎞  ...')
-        self.xtrain = load_dataset(train)
+        self.xtrain = train
         self.tfidf_vectorizer = TfidfVectorizer(analyzer="word", ngram_range=(1, 3)) # initializing tf-idf vectorizer class with the training ds to learn the vocab
         self.documents = [doc.text for doc in self.xtrain]
         self.tfidf_vectorizer.fit_transform(self.documents)
