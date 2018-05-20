@@ -21,26 +21,9 @@ import json
 
 
 maxabs_scaler = MaxAbsScaler()
-optparser = optparse.OptionParser()
-
-optparser.add_option(
-    "-T", "--xtrain", default="../data/sample.txt", # "../data/xtrain.txt"
-    help="xtrain set path"
-)
-optparser.add_option(
-    "-D", "--xdev", default="../data/sample.txt",  #"../data/xdev.txt"
-    help="xdev set path"
-)
-optparser.add_option(
-    "-t", "--test", default="../data/sample.txt",  #"../data/test.txtconverted.txt"
-    help="test set path"
-)
 
 
-opts = optparser.parse_args()[0]
-
-
-def parse_parameters():
+def parse_parameters(opts):
     """
         parameter list
         ---------------------
@@ -198,9 +181,9 @@ def evaluate_model(ds):
     print (score)
 
 
-def main ():
+def main (opts):
 
-    param = parse_parameters() # get parameters from command
+    param = parse_parameters(opts) # get parameters from command
 
     xtrain,xdev,test = read_datsets(param) # loading datsets as lists of document objects
     feats = features(xtrain)  # creating an object from the class features to initialize important global variables such as lexicons and training ds
@@ -217,4 +200,25 @@ def main ():
     evaluate_model(tested_test)  #evaluating the model on the test
 
 if __name__ == '__main__':
-    main()
+    optparser = optparse.OptionParser()
+
+    # optparser.add_option(
+    #     "-i", "--input", default="../data/sample.txt", # "../data/xtrain.txt"
+    #     help="xtrain set path"
+    # )
+    optparser.add_option(
+        "-T", "--xtrain", default="../data/sample.txt",  # "../data/xtrain.txt"
+        help="xtrain set path"
+    )
+    optparser.add_option(
+        "-D", "--xdev", default="../data/sample.txt",  # "../data/xdev.txt"
+        help="xdev set path"
+    )
+    optparser.add_option(
+        "-t", "--test", default="../data/sample.txt",  # "../data/test.txtconverted.txt"
+        help="test set path"
+    )
+
+    opts = optparser.parse_args()[0]
+
+    main(opts)
