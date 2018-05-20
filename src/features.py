@@ -8,6 +8,7 @@ from setup import load_dataset, load_json_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from counts_transformer import counts_vectorizer
 from readability import LexicalStyle_vectorizer, Readability_vectorizer
+from feature_extraction.nela_transformer import nela_vectorizer
 
 class features:
     def __init__(self, train):
@@ -55,4 +56,8 @@ class features:
 
     def extract_readability_features(self, ds):
         vectorizer = Readability_vectorizer()
+        return vectorizer
+
+    def extract_nela_features(self,ds):
+        vectorizer = nela_vectorizer()
         return vectorizer

@@ -24,15 +24,15 @@ maxabs_scaler = MaxAbsScaler()
 optparser = optparse.OptionParser()
 
 optparser.add_option(
-    "-T", "--xtrain", default="../data/xtrain.txt", # "../data/xtrain.txt"
+    "-T", "--xtrain", default="../data/sample.txt", # "../data/xtrain.txt"
     help="xtrain set path"
 )
 optparser.add_option(
-    "-D", "--xdev", default="../data/xdev.txt",  #"../data/xdev.txt"
+    "-D", "--xdev", default="../data/sample.txt",  #"../data/xdev.txt"
     help="xdev set path"
 )
 optparser.add_option(
-    "-t", "--test", default="../data/test.txtconverted.txt",  #"../data/test.txtconverted.txt"
+    "-t", "--test", default="../data/sample.txt",  #"../data/test.txtconverted.txt"
     help="test set path"
 )
 
@@ -111,16 +111,17 @@ def read_datsets(param):
 def extract_features(ds, feats):
 
     print('constructing features pipeline ...')
-    tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
-    lexical = feats.extract_lexical(ds)
-    lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
-    readability_features = feats.extract_readability_features(ds)
-
+    #tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
+    #lexical = feats.extract_lexical(ds)
+    #lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
+    #readability_features = feats.extract_readability_features(ds)
+    nela_features = feats.extract_nela_features(ds)
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical),
-                                        ('lexicalstyle', lexicalstyle_features),
-                                        ('readability', readability_features)
+    features_pipeline =  FeatureUnion([ #('tf-idf',tfidf),
+                                        #('lexical', lexical),
+                                        #('lexicalstyle', lexicalstyle_features),
+                                        #('readability', readability_features),
+                                        ('nela', nela_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
