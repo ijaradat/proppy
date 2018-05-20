@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 # coding: utf-8
 import sys
 # for Arabic encoding purposes
@@ -10,9 +9,10 @@ import json
 import pickle
 from collections import OrderedDict
 from features import *
+
 from document import document
 
-print(sys.path)
+
 DEFAULT_SUFFIX = "feats.pickle"
 
 def load_json_dataset (dataset_file):
@@ -86,15 +86,33 @@ def main(arguments):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-
     parser.add_argument("-i", "--input", required=True,  # "../data/xtrain.txt"
         help="input dataset")
+
+    parser.add_argument("-t", "--tfidf", dest='tfidf', action="store_true",
+                        help="compute tdidf features")
+    parser.add_argument("-l", "--lexical", action="store_true", default=False,
+                        help="compute lexical features")
+    parser.add_argument("-s", "--style", action="store_true", default=False,
+                        help="compute lexical style features")
+    parser.add_argument("-r", "--readability", action="store_true", default=False,
+                        help="compute readability features")
+    parser.add_argument("-n", "--nela", action="store_true", default=False,
+                        help="compute Nela features")
+
     arguments = parser.parse_args()
 
-    main(arguments)
+    param = OrderedDict()
+    param['input'] = arguments.input
+    param['tfidf'] = arguments.tfidf
+    param['lexical'] = arguments.lexical
+    param['style'] = arguments.style
+    param['readability'] = arguments.readability
+    param['nela'] = arguments.nela
+
+    main(param)
 
     #
-    # parser = argparse.ArgumentParser("Remove (or keep only!) context features from a kelp file")
     # parser.add_argument('-i', '--input', dest='kelp_file', required=True, help="input kelp file")
     # parser.add_argument('-t', '--thread-remove', dest='thread', action='store_true',
     #                     help="remove the thread features (remove the others otherwise)")
@@ -107,17 +125,7 @@ if __name__ == '__main__':
 
 
 
-# optparser.add_argument("-t", "--tfidf", dest='tfidf', action="store_true",
-#                      help="compute tdidf features")
-# optparser.add_argument("-l", "--lexical", action="store_true", default=False,
-#                      help="compute lexical features")
-# optparser.add_argument("-s", "--style", action="store_true", default=False,
-#                      help="compute lexical style features")
-# optparser.add_argument("-r", "--readability", action="store_true", default=False,
-#                      help="compute readability features")
-# optparser.add_argument("-n", "--nela", action="store_true", default=False,
-#                      help="compute Nela features")
-
+#
 
 # opts = opt
 
