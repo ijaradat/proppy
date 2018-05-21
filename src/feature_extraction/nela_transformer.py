@@ -41,11 +41,11 @@ class nela_vectorizer(TransformerMixin): # any custom transformer needs to inher
                 pos_features_path = 'feature_extraction/temp/'
 
                 quotes, Exclaim, AllPunc, allcaps = self.Functions.stuff_LIWC_leftout('ERROR',article)
-                lex_div = self.Functions.ttr(article)
+                lex_div = float(self.Functions.ttr(article))
                 counts_norm = self.Functions.POS_features('input', article, pos_features_path)
-                counts_norm = [str(c) for c in counts_norm]
+                #counts_norm = [str(c) for c in counts_norm]
                 counts_norm_liwc, liwc_cats = self.Functions.LIWC(article, self.cat_dict, self.stem_dict, self.counts_dict)
-                counts_norm_liwc = [str(c) for c in counts_norm_liwc]
+                #counts_norm_liwc = [str(c) for c in counts_norm_liwc]
                 vadneg, vadneu, vadpos = self.Functions.vadersent(article)
                 fke, SMOG = self.Functions.readability(article)
                 stop, wordlen, WC = self.Functions.wordlen_and_stop(article)
@@ -59,7 +59,7 @@ class nela_vectorizer(TransformerMixin): # any custom transformer needs to inher
                 IngroupVirtue, IngroupVice, AuthorityVirtue, \
                 AuthorityVice, PurityVirtue, PurityVice, \
                 MoralityGeneral = self.Functions.moral_foundation_feats(article)
-                happiness = self.Functions.happiness_index_feats(article)
+                happiness = float(self.Functions.happiness_index_feats(article))
 
                 seq = [happiness, HarmVirtue, HarmVice,
                        FairnessVirtue, FairnessVice, IngroupVirtue, IngroupVice,

@@ -94,16 +94,16 @@ def read_datsets(param):
 def extract_features(ds, feats):
 
     print('constructing features pipeline ...')
-    #tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
-    #lexical = feats.extract_lexical(ds)
-    #lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
-    #readability_features = feats.extract_readability_features(ds)
+    tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
+    lexical = feats.extract_lexical(ds)
+    lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
+    readability_features = feats.extract_readability_features(ds)
     nela_features = feats.extract_nela_features(ds)
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ #('tf-idf',tfidf),
-                                        #('lexical', lexical),
-                                        #('lexicalstyle', lexicalstyle_features),
-                                        #('readability', readability_features),
+    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
+                                        ('lexical', lexical),
+                                        ('lexicalstyle', lexicalstyle_features),
+                                        ('readability', readability_features),
                                         ('nela', nela_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
@@ -129,9 +129,9 @@ def train_model(train, feats):
     print "Computing features"
     X = features_pipeline.transform([doc.text for doc in train]) # calling transform method of each transformer in the features pipeline to transform data into vectors of features
     X = maxabs_scaler.fit_transform(X)
-    print ('maximum absolute values :')
+    #print ('maximum absolute values :')
     max_vals = np.amax(X, axis=0) # get the max absolute value of each feature from all data examples
-    print (max_vals)
+    #print (max_vals)
     #print (max_vals[np.argsort(max_vals)[-10:]])  # get the 10 max values from the list of max abs value of each feature above
     pickle.dump(X, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
     #X = pickle.load('train_features.pickle')
@@ -159,9 +159,9 @@ def test_model(test, feats):
     model = joblib.load('maxentr_model.pkl') #load the pickled model
     X = features_pipeline.transform([doc.text for doc in test])  # calling transform method of each transformer in the features pipeline to transform data into vectors of features
     X = maxabs_scaler.transform(X)
-    print ('maximum absolute values :')
-    max_vals = np.amax(X, axis=0)
-    print (max_vals)
+    #print ('maximum absolute values :')
+    #max_vals = np.amax(X, axis=0)
+    #print (max_vals)
     #print (max_vals[np.argsort(max_vals)[-10:]])
     pickle.dump(X, open("test_features.pickle", "wb"))  # dump it (to speed up exp.)
     #X = pickle.load('test_features.pickle')
