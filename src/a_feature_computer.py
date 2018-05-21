@@ -99,10 +99,14 @@ def get_output_file_name(input_file, list_of_features):
     return input_file+"."+".".join(list_of_features)+".features.pickle"
 
 
-
+def display_params(param):
+    parameters = "\n".join(["\t"+x+": " + str(y) for x, y in param.iteritems()])
+    logging.info("Input parameters:\n%s \n", parameters)
+    # for k in param:
+    #     logging.info("%s: %s", k, param[k])
 def main(arguments):
     # param = parse_parameters() # get parameters from command
-
+    display_params(param)
     dataset = read_datsets(arguments['input']) # loading dataset as lists of document objects
 
     # for current in [x for x in ['tfidf', 'lexical', 'style', 'readability', 'nela'] if arguments[x]]:
@@ -121,6 +125,7 @@ def main(arguments):
                             [x for x in ['tfidf', 'lexical', 'style', 'readability', 'nela'] if arguments[x]])
     pickle.dump(X, open(output_file, "wb"))
     logging.info("Features stored in %s", output_file)
+
 
 
 if __name__ == '__main__':
