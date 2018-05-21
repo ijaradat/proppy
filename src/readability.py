@@ -28,7 +28,9 @@ class Readability_vectorizer(TransformerMixin):
         print("Computing readability features")
         features = []
         for doc in X:
+            # print doc
             self._process_text(doc)
+            # print self.counters
             features.append([self.flesch_kincaid_grade_level(),
                              self.flesch_reading_ease(),
                              self.gunning_fog_index()])
