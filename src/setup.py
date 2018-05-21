@@ -176,7 +176,7 @@ def evaluate_model(ds):
     # F1 score
     y_true = [doc.gold_label for doc in ds] # getting all gold labels of the ds as one list
     y_pred = [doc.prediction for doc in ds] # getting all model predicted lebels as a list
-    score = f1_score(y_true, y_pred, average='macro' ,labels=['1','2','3','4']) # calculating F1 score
+    score = f1_score(y_true, y_pred, average='macro') # calculating F1 score
     print ("F1 scores:")
     print (score)
 
@@ -207,15 +207,15 @@ if __name__ == '__main__':
     #     help="xtrain set path"
     # )
     optparser.add_option(
-        "-T", "--xtrain", default="../data/sample.txt",  # "../data/xtrain.txt"
+        "-T", "--xtrain", default="../data/sample.json",  # "../data/xtrain.txt"
         help="xtrain set path"
     )
     optparser.add_option(
-        "-D", "--xdev", default="../data/sample.txt",  # "../data/xdev.txt"
+        "-D", "--xdev", default="../data/sample.json",  # "../data/xdev.txt"
         help="xdev set path"
     )
     optparser.add_option(
-        "-t", "--test", default="../data/sample.txt",  # "../data/test.txtconverted.txt"
+        "-t", "--test", default="../data/sample.json",  # "../data/test.txtconverted.txt"
         help="test set path"
     )
 
