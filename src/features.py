@@ -17,7 +17,8 @@ class features:
         self.tfidf_vectorizer = TfidfVectorizer(analyzer="word", ngram_range=(1, 3)) # initializing tf-idf vectorizer class with the training ds to learn the vocab
         self.documents = [doc.text for doc in self.xtrain]
         self.tfidf_vectorizer.fit_transform(self.documents)
-
+        self.tfidf_char_vectorizer = TfidfVectorizer(analyzer="char", ngram_range=(1,1))
+        self.tfidf_char_vectorizer.fit_transform(self.documents)
         self.lexicons = ['../data/lexicons/act_adverbs_wik.txt', '../data/lexicons/assertives_hooper1975.txt','../data/lexicons/comparative_forms_wik.txt',
                          '../data/lexicons/firstPers_liwc.txt','../data/lexicons/hear_liwc.txt', '../data/lexicons/hedges_hyland2005.txt',
                          '../data/lexicons/manner_adverbs_wik.txt', '../data/lexicons/modal_adverbs_wik.txt', '../data/lexicons/money_liwc.txt',
@@ -30,6 +31,8 @@ class features:
         #    doc.baseline_feature = self.tfidf_vectorizer.transform([doc.text])
         return self.tfidf_vectorizer
 
+    def extract_char_n_grams(self,ds):
+        return self.tfidf_char_vectorizer
 
     def extract_from_lexicon1(self,ds,lexicon): # function not used (use if you want each term in each lexicon to be a single feature)
         vectorizer = CountVectorizer(analyzer='word', vocabulary=lexicon)
