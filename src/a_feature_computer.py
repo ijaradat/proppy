@@ -6,6 +6,7 @@ sys.setdefaultencoding('utf-8')
 import argparse
 import codecs
 import json
+import logging
 import pickle
 
 from collections import OrderedDict
@@ -15,22 +16,26 @@ from sklearn.preprocessing import MaxAbsScaler
 from document import document
 from features import *
 
-DEFAULT_SUFFIX = "feats.pickle"
+# DEFAULT_SUFFIX = "feats.pickle"
+FORMAT = "%(asctime)-15s %(message)s"
+logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+
 
 def load_json_dataset (dataset_file):
-    print ('loading dataset: ' + dataset_file + ' ...')
+    logging.info('loading dataset: %s', dataset_file)
+    # logging.info ()
     dataset = []
     ds = json.load(open(dataset_file))
     for i, item in enumerate(ds):
         article = document(item['html_text'], item['propaganda_label'], i)
         dataset.append(article)
-    print ('dataset loaded !')
+        logging.info('dataset loaded !')
     return dataset
 
 
 def load_dataset(dataset_file):
-    print ('loading dataset: '+dataset_file+ ' ...')
-    dataset =[]
+    logging.info('loading dataset: %s', dataset_file)
+    dataset = []
     with codecs.open(dataset_file,'r') as f:
         i=0
         for line in f:
@@ -39,7 +44,7 @@ def load_dataset(dataset_file):
             dataset.append(article)
             i+=1
         f.close()
-    print ('dataset loaded !')
+    logging.info('dataset loaded !')
     return dataset
 
 
@@ -78,12 +83,12 @@ def compute_features(ds, tfidf=True, lexical=False, style=True, readability=Fals
         list_of_pipelines.append(('nela', features_instance.extract_nela_features(ds) ))
 
     features_pipeline = FeatureUnion(list_of_pipelines)
-    print('features pipeline ready!')
+    logging.info('features pipeline ready!')
     X = features_pipeline.transform([doc.text for doc in ds])
 
     maxabs_scaler = MaxAbsScaler()
     X = maxabs_scaler.fit_transform(X)
-    print ("Features computed")
+    logging.info("Features computed")
     return X
 
 
@@ -115,7 +120,7 @@ def main(arguments):
     output_file = get_output_file_name(arguments['input'],
                             [x for x in ['tfidf', 'lexical', 'style', 'readability', 'nela'] if arguments[x]])
     pickle.dump(X, open(output_file, "wb"))
-    print ("Features stored in", output_file)
+    logging.info("Features stored in %s", output_file)
 
 
 if __name__ == '__main__':
@@ -188,7 +193,5 @@ if __name__ == '__main__':
 #     param['readability'] = opts.readability
 #     param['nela'] = opts.nela
 #
-#     print ("PARAMETER LIST:_______________________________________________________________________")
-#     print (param)
 #
 #     return param
