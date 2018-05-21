@@ -7,11 +7,13 @@ import argparse
 import codecs
 import json
 import pickle
+
 from collections import OrderedDict
-from features import *
+from sklearn.pipeline import FeatureUnion
+from sklearn.preprocessing import MaxAbsScaler
 
 from document import document
-
+from features import *
 
 DEFAULT_SUFFIX = "feats.pickle"
 
@@ -49,39 +51,71 @@ def read_datsets(input_file):
     return dataset
 
 
-def compute_features(feats, ds, required_feature):
+# def compute_features(feats, ds, required_feature):
+def compute_features(ds, tfidf=True, lexical=False, style=True, readability=False, nela=False):
+    """
+    :param ds: input dataset
+    :param tfidf: true of you want to compute it
+    :param lexical: true of you want to compute it
+    :param style:   true of you want to compute it
+    :param readability: true of you want to compute it
+    :param nela:    true of you want to compute it
+    :return: scaled features
+    """
 
-    if required_feature == 'tfidf':
-        features_pipeline = feats.extract_baseline_feature(ds)
-    elif required_feature == 'lexical':
-        features_pipeline = feats.extract_lexical(ds)
-    elif required_feature == 'style':
-        features_pipeline = feats.extract_lexicalstyle_features(ds)
-    elif required_feature == 'readability':
-        features_pipeline = feats.extract_readability_features(ds)
-    elif required_feature == 'nela':
-        features_pipeline = feats.extract_nela_features(ds)
-    else:
-        print("ERROR, I cannot compute features", required_feature)
-        exit(1)
+    features_instance = features(ds)
+
+    list_of_pipelines = []
+    if tfidf:
+        list_of_pipelines.append( ('tfidf',  features_instance.extract_baseline_feature(ds)))
+    if lexical:
+        list_of_pipelines.append((('lexical', features_instance.extract_lexical(ds) )))
+    if style:
+        list_of_pipelines.append(('style', features_instance.extract_lexicalstyle_features(ds) ))
+    if readability:
+        list_of_pipelines.append(('readability', features_instance.extract_readability_features(ds) ))
+    if nela:
+        list_of_pipelines.append(('nela', features_instance.extract_nela_features(ds) ))
+
+    features_pipeline = FeatureUnion(list_of_pipelines)
+    print('features pipeline ready!')
     X = features_pipeline.transform([doc.text for doc in ds])
 
+    maxabs_scaler = MaxAbsScaler()
+    X = maxabs_scaler.fit_transform(X)
     print ("Features computed")
     return X
 
 
-def get_output_file_name(input_file, current_feat):
-    return input_file+"."+current_feat+".features.pickle"
+# def get_output_file_name(input_file, current_feat):
+#     return input_file+"."+current_feat+".features.pickle"
+
+def get_output_file_name(input_file, list_of_features):
+    return input_file+"."+".".join(list_of_features)+".features.pickle"
+
 
 
 def main(arguments):
     # param = parse_parameters() # get parameters from command
 
     dataset = read_datsets(arguments['input']) # loading dataset as lists of document objects
-    features_instance = features(dataset)
-    for current in [x for x in ['tfidf', 'lexical', 'style', 'readability', 'nela'] if arguments[x]]:
-        X = compute_features(features_instance , dataset, current)
-        pickle.dump(X, open(get_output_file_name(arguments['input'], current), "wb"))
+
+    # for current in [x for x in ['tfidf', 'lexical', 'style', 'readability', 'nela'] if arguments[x]]:
+    #     X = compute_features(dataset, tfidf=arguments['tfidf'], )
+    #     pickle.dump(X, open(get_output_file_name(arguments['input'], current), "wb"))
+
+    # for current in [x for x in ['tfidf', 'lexical', 'style', 'readability', 'nela'] if arguments[x]]:
+    X = compute_features(dataset,
+                         tfidf=arguments['tfidf'],
+                         lexical=arguments['lexical'],
+                         style=arguments['style'],
+                         readability=arguments['readability'],
+                         nela=arguments['nela']
+                         )
+    output_file = get_output_file_name(arguments['input'],
+                            [x for x in ['tfidf', 'lexical', 'style', 'readability', 'nela'] if arguments[x]])
+    pickle.dump(X, open(output_file, "wb"))
+    print ("Features stored in", output_file)
 
 
 if __name__ == '__main__':
@@ -123,7 +157,13 @@ if __name__ == '__main__':
     # main()
 
 
-
+# features_pipeline = FeatureUnion([
+#     ('tfidf', load_features_from_pickle("pickle_file"))
+#
+# ]
+#
+#
+# )
 
 #
 
