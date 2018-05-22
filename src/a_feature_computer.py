@@ -83,7 +83,7 @@ def compute_features(ds, features_instance, tfidf=True, char_grams=False, lexica
         list_of_pipelines.append(('readability', features_instance.extract_readability_features(ds) ))
     if nela:
         list_of_pipelines.append(('nela', features_instance.extract_nela_features(ds) ))
-        features_instance.extract_char_n_grams()
+        
 
     features_pipeline = FeatureUnion(list_of_pipelines)
     X = features_pipeline.transform([doc.text for doc in ds])
