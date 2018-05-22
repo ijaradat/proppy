@@ -37,7 +37,7 @@ def main(arguments):
     display_params(arguments)
     Y = get_gold_labels(arguments['input'])
 
-    X = pickle.load(arguments['features'])
+    X = pickle.load(open(arguments['features'], 'rb'))  # todo not sure if this file is closed, as in with
     logging.info("Features loaded from %s", arguments['features'])
 
     model = train_model(X, Y)
