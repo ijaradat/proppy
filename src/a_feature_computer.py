@@ -33,6 +33,22 @@ def load_json_dataset (dataset_file):
     return dataset
 
 
+def load_myds(dataset_file):
+    print ('loading dataset: ' + dataset_file + ' ...')
+    dataset = []
+    with codecs.open(dataset_file, 'r', encoding='utf8') as f:
+        i = 0
+        for line in f:
+            # line= line.strip()
+            fields = line.split('\t')
+            article = document(fields[0], fields[-1], i)
+            dataset.append(article)
+            i += 1
+        f.close()
+    print ('dataset loaded !')
+    return dataset
+
+
 def load_dataset(dataset_file):
     logging.info('loading dataset: %s', dataset_file)
     dataset = []
@@ -51,6 +67,8 @@ def load_dataset(dataset_file):
 def read_datsets(input_file):
     if input_file.endswith('.json'):
         dataset = load_json_dataset(input_file)
+    elif input_file.endswith('.converted.txt'):
+        dataset = load_myds(input_file)
     else:
         dataset = load_dataset(input_file)
     return dataset
@@ -68,8 +86,6 @@ def compute_features(ds, features_instance, tfidf=True, char_grams=False, lexica
     :return: scaled features
     """
 
-
-
     list_of_pipelines = []
     if tfidf:
         list_of_pipelines.append( ('tfidf',  features_instance.extract_baseline_feature(ds)))
@@ -83,7 +99,6 @@ def compute_features(ds, features_instance, tfidf=True, char_grams=False, lexica
         list_of_pipelines.append(('readability', features_instance.extract_readability_features(ds) ))
     if nela:
         list_of_pipelines.append(('nela', features_instance.extract_nela_features(ds) ))
-        
 
     features_pipeline = FeatureUnion(list_of_pipelines)
     X = features_pipeline.transform([doc.text for doc in ds])
@@ -126,7 +141,7 @@ def main(arguments):
                              readability=arguments['readability'],
                              nela=arguments['nela']
                              )
-        if i == 0:  #It is the first iteration and we assume this is training
+        if i == 0:  # It is the first iteration and we assume this is training
             X = maxabs_scaler.fit_transform(X)
         else:
             X = maxabs_scaler.transform(X)
@@ -137,7 +152,7 @@ def main(arguments):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, nargs='+', # "../data/xtrain.txt"
-        help="input dataset")
+                        help="input dataset")
 
     parser.add_argument("-t", "--tfidf", dest='tfidf', action="store_true",
                         help="compute tdidf features")
@@ -164,48 +179,3 @@ if __name__ == '__main__':
     param['nela'] = arguments.nela
 
     main(param)
-
-    #
-    # parser.add_argument('-i', '--input', dest='kelp_file', required=True, help="input kelp file")
-    # parser.add_argument('-t', '--thread-remove', dest='thread', action='store_true',
-    #                     help="remove the thread features (remove the others otherwise)")
-    #
-    # arguments = parser.parse_args()
-    # main(arguments)
-    #
-    # main()
-
-
-# features_pipeline = FeatureUnion([
-#     ('tfidf', load_features_from_pickle("pickle_file"))
-#
-# ]
-#
-#
-# )
-
-#
-
-# opts = opt
-
-
-# def parse_parameters():
-#     """
-#         parameter list
-#         ---------------------
-#         --input -i          --output -o
-#
-#     Parse the input parameters
-#     :return: <dictionary>  a dictionary of parameters
-#     """
-#     param = OrderedDict()
-#
-#     param['input'] = opts.input
-#     param['tfidf'] = opts.tfidf
-#     param['lexical'] = opts.lexical
-#     param['style'] = opts.style
-#     param['readability'] = opts.readability
-#     param['nela'] = opts.nela
-#
-#
-#     return param

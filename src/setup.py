@@ -62,7 +62,7 @@ def load_myds(dataset_file):
     with codecs.open(dataset_file, 'r', encoding='utf8') as f:
         i = 0
         for line in f:
-            line= line.strip()
+            # line= line.strip()
             fields = line.split('\t')
             article = document(fields[0], fields[-1], i)
             dataset.append(article)
