@@ -51,7 +51,7 @@ def load_json_dataset (dataset_file):
     dataset = []
     ds = json.load(open(dataset_file))
     for i, item in enumerate(ds):
-        article = document(item['html_text'], item['propaganda_label'], i)
+        article = document(item['html_text'], item['propaganda_label'], item['gdlt_id'],item['gdlt_srcURL'] )
         dataset.append(article)
     print ('dataset loaded !')
     return dataset
@@ -62,9 +62,9 @@ def load_myds(dataset_file):
     with codecs.open(dataset_file, 'r', encoding='utf8') as f:
         i = 0
         for line in f:
-            # line= line.strip()
+            line= line.strip()
             fields = line.split('\t')
-            article = document(fields[0], fields[-1], i)
+            article = document(fields[0], fields[-1], fields[4], fields[5]) # html_text, prop_label, gdelt_id, gdelt_sourceURL
             dataset.append(article)
             i += 1
         f.close()
@@ -173,7 +173,7 @@ def train_model(train, feats):
 
 
 
-def test_model(test, feats):
+def test_model(test, feats, ds_name, predictions_file = '../data/predictions-'):
     print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
     features_pipeline= extract_features(test, feats)  # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
@@ -191,6 +191,11 @@ def test_model(test, feats):
     Y_ = model.predict(X)  # predicting the labels in this ds via the trained model loaded in the variable 'model'
     for i, doc in enumerate(test):
         doc.prediction  = Y_[i]
+
+    with codecs.open(predictions_file+ds_name+'.txt', 'w',encoding='utf8') as out:
+        out.write('document_id\tsource_URL\tgold_label\tprediction\n')
+        for doc in test:
+            out.write(doc.id+'\t'+doc.source+'\t'+doc.gold_label+'\t'+doc.prediction+'\n')
     return test
 
 
@@ -216,8 +221,8 @@ def main (opts):
 
     train_model(xtrain, feats)  # training the model
 
-    tested_dev = test_model(xdev, feats)  #testing the model with the dev ds
-    tested_test = test_model(test, feats)  #testing the model with the test ds
+    tested_dev = test_model(xdev, feats,'test')  #testing the model with the dev ds
+    tested_test = test_model(test, feats,'dev')  #testing the model with the test ds
 
     print ('evaluating the model using dev ds ...')
     evaluate_model(tested_dev)  # evaluating the model on the dev

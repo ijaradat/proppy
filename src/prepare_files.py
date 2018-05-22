@@ -111,10 +111,10 @@ def from_josn_to_tsv(file):
             a['propaganda_label'] = a['propaganda_label'].strip()
 
             #writing the fixed file to a tsv file
-            out.write(a['html_text']+'\t'+a['gdlt_actionGeo']+'\t'+a['gdlt_avgTone']+'\t'+a['gdlt_day']+'\t'+ a['gdlt_id']+'\t'+ a['gdlt_id']+'\t'+
+            out.write(a['html_text']+'\t'+a['gdlt_actionGeo']+'\t'+a['gdlt_avgTone']+'\t'+a['gdlt_day']+'\t'+ a['gdlt_id']+'\t'+ a['gdlt_srcURL']+'\t'+
                       a['html_authors']+'\t'+a['html_title']+'\t'+
                       a['mbfc_class']+'\t'+a['mbfc_link']+'\t'+a['mbfc_name']+'\t'+ a['mbfc_notes']+'\t'+a['mbfc_score']+'\t'+a['mbfc_url']+'\t'+a['propaganda_label']+'\n')
 
-from_josn_to_tsv('../data/train.json')
+from_josn_to_tsv('../data/test.json')
 #separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')
 #separate_subjectives('../data/lexicons/subjectivity_clues_hltemnlp05/subjectivity_clues_hltemnlp05/subjclueslen1-HLTEMNLP05.txt')
