@@ -56,6 +56,22 @@ def load_json_dataset (dataset_file):
     print ('dataset loaded !')
     return dataset
 
+def load_myds(dataset_file):
+    print ('loading dataset: ' + dataset_file + ' ...')
+    dataset = []
+    with codecs.open(dataset_file, 'r', encoding='utf8') as f:
+        i = 0
+        for line in f:
+            line= line.strip()
+            fields = line.split('\t')
+            article = document(fields[0], fields[-1], i)
+            dataset.append(article)
+            i += 1
+        f.close()
+    print ('dataset loaded !')
+    return dataset
+
+
 def load_dataset(dataset_file):
     print ('loading dataset: '+dataset_file+ ' ...')
     dataset =[]
@@ -74,16 +90,22 @@ def read_datsets(param):
     print ('reading datasets ...')
     if param['xtrain'].endswith('.json'):
         xtrain = load_json_dataset(param['xtrain'])
+    elif param['xtrain'].endswith('.converted.txt'):
+        xtrain = load_myds(param['xtrain'])
     else:
         xtrain = load_dataset(param['xtrain'])
 
     if param['xdev'].endswith('.json'):
         xdev = load_json_dataset(param['xdev'])
+    elif param['xdev'].endswith('.converted.txt'):
+        xdev = load_myds(param['xdev'])
     else:
         xdev = load_dataset(param['xdev'])
 
     if param['test'].endswith('.json'):
         test = load_json_dataset(param['test'])
+    elif param['test'].endswith('.converted.txt'):
+        test = load_myds(param['test'])
     else:
         test = load_dataset(param['test'])
 

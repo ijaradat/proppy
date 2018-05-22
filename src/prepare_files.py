@@ -1,4 +1,5 @@
 import codecs
+import json
 
 def replace_separator(data_file):
     with codecs.open(data_file, 'r') as f:
@@ -76,9 +77,41 @@ def separate_subjectives(file):
             out.close()
 
 
+def from_josn_to_tsv(file):
 
+    articles = json.load(open(file))
+    with codecs.open(file+'.converted.tsv', 'w', encoding='utf8') as out:
+        for a in articles:
+            # fixing text (removing new lines and tabs)
+            a['gdlt_actionGeo']= a['gdlt_actionGeo'].strip()
+            a['gdlt_avgTone'] = a['gdlt_avgTone'].strip()
+            a['gdlt_day'] = a['gdlt_day'].strip()
+            a['gdlt_id'] = a['gdlt_id'].strip()
+            a['gdlt_srcURL'] = a['gdlt_srcURL'].strip()
+            a['html_authors'] = a['html_authors'].strip()
+            a['html_text'] = a['html_text'].strip()
+            a['html_text'] = a['html_text'].replace("\n", " ")
+            a['html_text'] = a['html_text'].replace("\t", " ")
+            a['html_title'] = a['html_title'].strip()
+            a['html_title'] = a['html_title'].replace("\n", " ")
+            a['html_title'] = a['html_title'].replace("\t", " ")
+            a['mbfc_class'] = a['mbfc_class'].strip()
+            a['mbfc_link'] = a['mbfc_link'].strip()
+            a['mbfc_link'] = a['mbfc_link'].replace("\n", " ")
+            a['mbfc_link'] = a['mbfc_link'].replace("\t", " ")
+            a['mbfc_name'] = a['mbfc_name'].strip()
+            a['mbfc_notes'] = a['mbfc_notes'].strip()
+            a['mbfc_notes'] = a['mbfc_notes'].replace("\n", " ")
+            a['mbfc_notes'] = a['mbfc_notes'].replace("\t", " ")
+            a['mbfc_score'] = a['mbfc_score'].strip()
+            a['mbfc_url'] = a['mbfc_url'].strip()
+            a['propaganda_label'] = a['propaganda_label'].strip()
 
+            #writing the fixed file to a tsv file
+            out.write(a['html_text']+'\t'+a['gdlt_actionGeo']+'\t'+a['gdlt_avgTone']+'\t'+a['gdlt_day']+'\t'+ a['gdlt_id']+'\t'+ a['gdlt_id']+'\t'+
+                      a['html_authors']+'\t'+a['html_title']+'\t'+
+                      a['mbfc_class']+'\t'+a['mbfc_link']+'\t'+a['mbfc_name']+'\t'+ a['mbfc_notes']+'\t'+a['mbfc_score']+'\t'+a['mbfc_url']+'\t'+a['propaganda_label']+'\n')
 
-
+from_josn_to_tsv('../data/dev.json')
 #separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')
-separate_subjectives('../data/lexicons/subjectivity_clues_hltemnlp05/subjectivity_clues_hltemnlp05/subjclueslen1-HLTEMNLP05.txt')
+#separate_subjectives('../data/lexicons/subjectivity_clues_hltemnlp05/subjectivity_clues_hltemnlp05/subjclueslen1-HLTEMNLP05.txt')
