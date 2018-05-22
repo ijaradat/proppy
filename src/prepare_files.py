@@ -81,7 +81,10 @@ def from_josn_to_tsv(file):
 
     articles = json.load(open(file))
     with codecs.open(file+'.converted.tsv', 'w', encoding='utf8') as out:
+
         for a in articles:
+            if a['html_text'].strip() == "":
+                continue
             # fixing text (removing new lines and tabs)
             a['gdlt_actionGeo']= a['gdlt_actionGeo'].strip()
             a['gdlt_avgTone'] = a['gdlt_avgTone'].strip()
@@ -112,6 +115,6 @@ def from_josn_to_tsv(file):
                       a['html_authors']+'\t'+a['html_title']+'\t'+
                       a['mbfc_class']+'\t'+a['mbfc_link']+'\t'+a['mbfc_name']+'\t'+ a['mbfc_notes']+'\t'+a['mbfc_score']+'\t'+a['mbfc_url']+'\t'+a['propaganda_label']+'\n')
 
-from_josn_to_tsv('../data/dev.json')
+from_josn_to_tsv('../data/train.json')
 #separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')
 #separate_subjectives('../data/lexicons/subjectivity_clues_hltemnlp05/subjectivity_clues_hltemnlp05/subjclueslen1-HLTEMNLP05.txt')

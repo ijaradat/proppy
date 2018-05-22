@@ -13,7 +13,7 @@ from features import *
 from document import document
 from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.ensemble import ExtraTreesClassifier
@@ -117,16 +117,16 @@ def extract_features(ds, feats):
 
     print('constructing features pipeline ...')
     tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
-    lexical = feats.extract_lexical(ds)
-    lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
-    readability_features = feats.extract_readability_features(ds)
-    nela_features = feats.extract_nela_features(ds)
+    #lexical = feats.extract_lexical(ds)
+    #lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
+    #readability_features = feats.extract_readability_features(ds)
+    #nela_features = feats.extract_nela_features(ds)
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('lexical', lexical),
-                                        ('lexicalstyle', lexicalstyle_features),
-                                        ('readability', readability_features),
-                                        ('nela', nela_features)
+    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf)
+                                        #('lexical', lexical),
+                                        #('lexicalstyle', lexicalstyle_features),
+                                        #('readability', readability_features),
+                                        #('nela', nela_features)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
@@ -157,19 +157,19 @@ def train_model(train, feats):
     #print (max_vals[np.argsort(max_vals)[-10:]])  # get the 10 max values from the list of max abs value of each feature above
     pickle.dump(X, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
     #X = pickle.load('train_features.pickle')
-    print "Saving features to file"
+    #print "Saving features to file"
     Y = [doc.gold_label for doc in train]
-    pickle.dump(Y, open("train_gold.pickle", "wb"))  # dump it (to speed up exp.)
+    #pickle.dump(Y, open("train_gold.pickle", "wb"))  # dump it (to speed up exp.)
     print ('fitting the model according to given data ...')
     model.fit(X, Y)
 
     joblib.dump(model, 'maxentr_model.pkl') #pickle the model
     print ('model pickled at : maxentr_model.pkl ')
 
-    print ('features importance :')
-    coefs = model.coef_[0]
-    feature_list = sorted([ (coefs[i], feature) for i, feature in enumerate(features_pipeline.get_feature_names()) ])
-    joblib.dump(feature_list, 'basic_features_mvf.pkl')
+    # print ('features importance :')
+    # coefs = model.coef_[0]
+    # feature_list = sorted([ (coefs[i], feature) for i, feature in enumerate(features_pipeline.get_feature_names()) ])
+    # joblib.dump(feature_list, 'basic_features_mvf.pkl')
 
 
 
@@ -198,9 +198,12 @@ def evaluate_model(ds):
     # F1 score
     y_true = [doc.gold_label for doc in ds] # getting all gold labels of the ds as one list
     y_pred = [doc.prediction for doc in ds] # getting all model predicted lebels as a list
-    score = f1_score(y_true, y_pred, average='macro') # calculating F1 score
-    print ("F1 scores:")
-    print (score)
+    f_score = f1_score(y_true, y_pred, average='macro') # calculating F1 score
+    accuracy = accuracy_score(y_true, y_pred)
+    print ("F1 score:")
+    print (f_score)
+    print ("Accuarcy :")
+    print (accuracy)
 
 
 def main (opts):
@@ -229,15 +232,15 @@ if __name__ == '__main__':
     #     help="xtrain set path"
     # )
     optparser.add_option(
-        "-T", "--xtrain", default="../data/sample.json",  # "../data/xtrain.txt"
+        "-T", "--xtrain", default="../data/train.json.converted.txt",  # "../data/xtrain.txt"
         help="xtrain set path"
     )
     optparser.add_option(
-        "-D", "--xdev", default="../data/sample.json",  # "../data/xdev.txt"
+        "-D", "--xdev", default="../data/dev.json.converted.txt",  # "../data/xdev.txt"
         help="xdev set path"
     )
     optparser.add_option(
-        "-t", "--test", default="../data/sample.json",  # "../data/test.txtconverted.txt"
+        "-t", "--test", default="../data/test.json.converted.txt",  # "../data/test.txtconverted.txt"
         help="test set path"
     )
 
