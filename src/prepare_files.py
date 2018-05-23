@@ -115,6 +115,20 @@ def from_josn_to_tsv(file):
                       a['html_authors']+'\t'+a['html_title']+'\t'+
                       a['mbfc_class']+'\t'+a['mbfc_link']+'\t'+a['mbfc_name']+'\t'+ a['mbfc_notes']+'\t'+a['mbfc_score']+'\t'+a['mbfc_url']+'\t'+a['propaganda_label']+'\n')
 
-from_josn_to_tsv('../data/test.json')
+def rashkan_statistics(ds_file):
+    with codecs.open(ds_file, 'r', encoding='utf8') as f:
+        count=0
+        for line in f:
+            line = line.strip()
+            line = line.lower()
+            if 'youtube' in line and len(line)<150:
+                count+=1
+                print (line)
+        print ('estimation of number of bad examples in dataset: '+ str(count))
+
+
+
+#rashkan_statistics('../data/xtrain.txt')
+#from_josn_to_tsv('../data/test.json')
 #separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')
 #separate_subjectives('../data/lexicons/subjectivity_clues_hltemnlp05/subjectivity_clues_hltemnlp05/subjclueslen1-HLTEMNLP05.txt')
