@@ -69,15 +69,15 @@ def list_sources_in_ds(ds_file):
             line = line.strip()
             fields = line.split('\t')
             if fields[-1] == '1':
-                if fields[5] in prop_sources:
-                    prop_sources[fields[5]] += 1
+                if fields[-2] in prop_sources:
+                    prop_sources[fields[-2]] += 1
                 else:
-                    prop_sources[fields[5]] = 1
-            elif fields[-1] == '1':
-                if fields[5] in nonprop_sources:
-                    nonprop_sources[fields[5]] += 1
+                    prop_sources[fields[-2]] = 1
+            elif fields[-1] == '-1':
+                if fields[-2] in nonprop_sources:
+                    nonprop_sources[fields[-2]] += 1
                 else:
-                    nonprop_sources[fields[5]] = 1
+                    nonprop_sources[fields[-2]] = 1
     print("Propagandistic sources statistics:______________________________________________________")
     print(prop_sources)
     print("Non propagandistic sources statistics:__________________________________________________")
@@ -86,6 +86,8 @@ def list_sources_in_ds(ds_file):
 
 
 def main(opts):
+    list_sources_in_ds('../data/train.json.converted.txt')
+    x=0
     param = parse_parameters(opts)  # get parameters from command
     selected_sources = []
     for s in param['sources']:

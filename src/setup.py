@@ -51,7 +51,7 @@ def load_json_dataset (dataset_file):
     dataset = []
     ds = json.load(open(dataset_file))
     for i, item in enumerate(ds):
-        article = document(item['html_text'], item['propaganda_label'], item['gdlt_id'],item['gdlt_srcURL'] )
+        article = document(item['html_text'], item['propaganda_label'], item['gdlt_id'],item['mbfc_url'] )
         dataset.append(article)
     print ('dataset loaded !')
     return dataset
@@ -64,7 +64,7 @@ def load_myds(dataset_file):
         for line in f:
             line= line.strip()
             fields = line.split('\t')
-            article = document(fields[0], fields[-1], fields[4], fields[5]) # html_text, prop_label, gdelt_id, gdelt_sourceURL
+            article = document(fields[0], fields[-1], fields[4], fields[-2]) # html_text, prop_label, gdelt_id, gdelt_sourceURL
             dataset.append(article)
             i += 1
         f.close()
