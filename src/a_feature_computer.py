@@ -34,7 +34,7 @@ def load_json_dataset (dataset_file):
 
 
 def load_myds(dataset_file):
-    print ('loading dataset: ' + dataset_file + ' ...')
+    logging.info('loading dataset: %s', dataset_file)
     dataset = []
     with codecs.open(dataset_file, 'r', encoding='utf8') as f:
         i = 0
