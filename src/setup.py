@@ -200,6 +200,7 @@ def test_model(test, feats, ds_name, predictions_file = '../data/predictions-'):
 
 
 def evaluate_model(ds):
+    print('████████████████  E V A L U A T I O N  ████████████████')
     # F1 score
     y_true = [doc.gold_label for doc in ds] # getting all gold labels of the ds as one list
     y_pred = [doc.prediction for doc in ds] # getting all model predicted lebels as a list
