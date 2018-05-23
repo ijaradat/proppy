@@ -79,7 +79,7 @@ def load_dataset(dataset_file):
         i=0
         for line in f:
             fields = line.split('\t')
-            article = document(fields[1],fields[0],i)
+            article = document(fields[1],fields[0],i,'')
             dataset.append(article)
             i+=1
         f.close()
