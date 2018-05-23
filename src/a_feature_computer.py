@@ -15,7 +15,7 @@ from sklearn.preprocessing import MaxAbsScaler
 
 from document import document
 from features import *
-from setup import *
+from setup import load_json_dataset, load_myds, load_dataset
 # DEFAULT_SUFFIX = "feats.pickle"
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
@@ -64,14 +64,14 @@ logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%
 #     return dataset
 
 
-# def read_datsets(input_file):
-#     if input_file.endswith('.json'):
-#         dataset = load_json_dataset(input_file)
-#     elif input_file.endswith('.converted.txt'):
-#         dataset = load_myds(input_file)
-#     else:
-#         dataset = load_dataset(input_file)
-#     return dataset
+def read_datsets(input_file):
+    if input_file.endswith('.json'):
+        dataset = load_json_dataset(input_file)
+    elif input_file.endswith('.converted.txt'):
+        dataset = load_myds(input_file)
+    else:
+        dataset = load_dataset(input_file)
+    return dataset
 
 
 # def compute_features(feats, ds, required_feature):
