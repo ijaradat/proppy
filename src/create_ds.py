@@ -86,7 +86,7 @@ def list_sources_in_ds(ds_file):
 
 
 def main(opts):
-    list_sources_in_ds('../data/train.json.converted.txt')
+    #list_sources_in_ds('../data/train.json.converted.txt')
     x=0
     param = parse_parameters(opts)  # get parameters from command
     selected_sources = []
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     optparser = optparse.OptionParser()
 
     optparser.add_option(
-        "-s", "--sources",
+        "-s", "--sources", default ='https://remnantnewspaper.com http://personalliberty.com/ http://www.frontpagemag.com/' ,
         help="list of selected propagandistic sources, type each source URL separated by a space"
     )
     optparser.add_option(
