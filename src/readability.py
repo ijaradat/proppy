@@ -2,11 +2,15 @@
 
 import math
 import nltk.data
+import logging
 import numpy as np
 import string
 
 from nltk import word_tokenize
 from sklearn.base import BaseEstimator, TransformerMixin
+
+FORMAT = "%(asctime)-15s %(message)s"
+logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
 class Readability_vectorizer(TransformerMixin):
 
@@ -25,7 +29,7 @@ class Readability_vectorizer(TransformerMixin):
                               ]
 
     def transform(self, X):
-        print("Computing readability features")
+
         features = []
         for doc in X:
             self._process_text(doc)
@@ -36,7 +40,7 @@ class Readability_vectorizer(TransformerMixin):
                              self.flesch_reading_ease(),
                              self.gunning_fog_index()])
         vector = np.array(features)
-        print("done")
+        logging.info("Readability features computed")
         return vector
 
     def fit(self):
@@ -196,7 +200,6 @@ class LexicalStyle_vectorizer(TransformerMixin):
 
     def transform(self, X):
         # COMPUTE THE FEATURES
-        print('Computing lexical style features...')
         counts = []
         for doc in X:
             # on row; in my case a matrix [5x16000]
@@ -211,7 +214,7 @@ class LexicalStyle_vectorizer(TransformerMixin):
         # (16,000 array for training)
         # print(counts)
         vect = np.array(counts)#.reshape(-1,1)
-        print('done')
+        logging.info("Lexical features computed")
         return vect
 
     def fit(self):
