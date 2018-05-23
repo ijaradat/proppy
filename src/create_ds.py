@@ -37,27 +37,28 @@ def create_dataset(ds_file,sources,random_sources,new_ds_file):
     articles_from_random =0
     with codecs.open(new_ds_file, 'w', encoding='utf8') as out:
         with codecs.open(ds_file, 'r', encoding='utf8') as f:
-            for line in f:
+            lines = f.readlines()
+            for line in lines:
                 line= line.strip()
                 fields = line.split('\t')
-                if fields[5] in sources:
+                if fields[-2] in sources:
                     assert (fields[-1] == '1')
                     out.write(line+'\n')
                     articles_from_sources+=1
-            for line in f:
+            for line in lines:
                 line =line.strip()
                 fields =line.split('\t')
-                if fields[5] in random_sources:
+                if fields[-2] in random_sources:
                     assert (fields[-1] == '-1')
                     out.write(line+'\n')
                     articles_from_random+=1
                     if articles_from_random == articles_from_sources:
-                        break
                         print ("number of articles from selected sources is: "+ str(articles_from_sources))
                         print ("number of articles from random sources is :"+str(articles_from_random))
                         f.close()
-
                         out.close()
+                        break
+
 
 #this function creates two dicts one for prop sources and the other for non prop sources in a given dataset
 # in each dict, the key is the source URL, and the value is the number of articles from that source in the dataset
@@ -87,11 +88,8 @@ def list_sources_in_ds(ds_file):
 
 def main(opts):
     #list_sources_in_ds('../data/train.json.converted.txt')
-    x=0
     param = parse_parameters(opts)  # get parameters from command
-    selected_sources = []
-    for s in param['sources']:
-        selected_sources.append(s)
+    selected_sources = param['sources'].split(',')
     prop_sources,nonprop_sources = list_sources_in_ds(param['train'])
     random_sources = nonprop_sources.keys()
 
@@ -116,8 +114,8 @@ if __name__ == '__main__':
     optparser = optparse.OptionParser()
 
     optparser.add_option(
-        "-s", "--sources", default ='https://remnantnewspaper.com http://personalliberty.com/ http://www.frontpagemag.com/' ,
-        help="list of selected propagandistic sources, type each source URL separated by a space"
+        "-s", "--sources", default ='https://remnantnewspaper.com,http://personalliberty.com/,http://www.frontpagemag.com/',
+        help="list of selected propagandistic sources, type each source URL separated by a comma"
     )
     optparser.add_option(
         "-T", "--train", default="../data/train.json.converted.txt",
