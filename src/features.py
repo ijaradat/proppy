@@ -4,7 +4,6 @@ import os, sys
 # for Arabic encoding purposes
 reload(sys)
 sys.setdefaultencoding('utf-8')
-from setup import load_dataset, load_json_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from counts_transformer import counts_vectorizer
 from readability import LexicalStyle_vectorizer, Readability_vectorizer
