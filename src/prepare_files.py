@@ -127,7 +127,24 @@ def rashkan_statistics(ds_file):
         print ('estimation of number of bad examples in dataset: '+ str(count))
 
 
+def remove_redundants(ds_file):
+    ids=[]
+    with codecs.open(ds_file+'.filtered.txt', 'w', encoding='utf8') as out:
+        with codecs.open(ds_file, 'r', encoding ='utf8') as f:
+            lines = f.readlines()
+            print ('Number of articles before filtering ='+str(len(lines)))
+            for line in lines:
+                line=line.strip()
+                fields= line.split('\t')
+                if fields[4] not in ids:
+                    out.write(line+'\n')
+                    ids.append(fields[4])
+            print ('Number of articles after filtering = '+ str(len(ids)))
 
+
+
+
+#remove_redundants('../data/train.json.converted.txt')
 #rashkan_statistics('../data/xtrain.txt')
 #from_josn_to_tsv('../data/test.json')
 #separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')

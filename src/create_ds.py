@@ -87,7 +87,7 @@ def list_sources_in_ds(ds_file):
 
 
 def main(opts):
-    #list_sources_in_ds('../data/train.json.converted.txt')
+    list_sources_in_ds('../data/train.json.converted.txt')
     param = parse_parameters(opts)  # get parameters from command
     selected_sources = param['sources'].split(',')
     prop_sources,nonprop_sources = list_sources_in_ds(param['train'])
