@@ -8,7 +8,9 @@ from collections import OrderedDict
 from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 
-from a_feature_computer import *
+from a_feature_computer import read_datsets, display_params
+# from setup import load_json_dataset, load_myds, load_dataset
+
 
 FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')

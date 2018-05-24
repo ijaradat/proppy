@@ -195,7 +195,7 @@ def test_model(test, feats, ds_name, predictions_file = '../data/predictions-'):
     with codecs.open(predictions_file+ds_name+'.txt', 'w',encoding='utf8') as out:
         out.write('document_id\tsource_URL\tgold_label\tprediction\n')
         for doc in test:
-            out.write(doc.id+'\t'+doc.source+'\t'+doc.gold_label+'\t'+doc.prediction+'\n')
+            out.write(str(doc.id)+'\t'+str(doc.source)+'\t'+doc.gold_label+'\t'+doc.prediction+'\n')
     return test
 
 
