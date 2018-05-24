@@ -79,7 +79,7 @@ def load_dataset(dataset_file):
         i=0
         for line in f:
             fields = line.split('\t')
-            article = document(fields[1],fields[0],i,'')
+            article = document(fields[1],fields[0],str(i),'')
             dataset.append(article)
             i+=1
         f.close()
@@ -147,7 +147,7 @@ def train_model(train, feats):
     features_pipeline = extract_features(train, feats) # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
 
-    model = LogisticRegression(penalty='l2') # creating an object from the max entropy with L2 regulariation
+    model = LogisticRegression(penalty='l2', class_weight='balanced') # creating an object from the max entropy with L2 regulariation
     print "Computing features"
     X = features_pipeline.transform([doc.text for doc in train]) # calling transform method of each transformer in the features pipeline to transform data into vectors of features
     X = maxabs_scaler.fit_transform(X)
