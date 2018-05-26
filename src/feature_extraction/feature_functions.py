@@ -216,7 +216,9 @@ class Functions:
         try:
             tags = [wt.split("/")[1] for wt in wordandtag]
         except:
-            print(wordandtag)
+            pass
+            #print(wordandtag)
+
 
         counts = collections.Counter(tags)
 
