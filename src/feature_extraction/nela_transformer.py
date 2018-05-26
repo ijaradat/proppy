@@ -13,7 +13,7 @@ class nela_vectorizer(TransformerMixin): # any custom transformer needs to inher
                     'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'WP$', 'WRB',
                     'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP']
 
-        self.seq = ('pid, source, date, Happiness, HarmVirtue, HarmVice, ' +
+        self.seq = ('Happiness, HarmVirtue, HarmVice, ' +
                'FairnessVirtue, FairnessVice, IngroupVirtue, IngroupVice, ' +
                'AuthorityVirtue, AuthorityVice, PurityVirtue, PurityVice, ' +
                'MoralityGeneral, bias_count, assertives_count, ' +

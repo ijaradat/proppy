@@ -8,6 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from counts_transformer import counts_vectorizer
 from readability import LexicalStyle_vectorizer, Readability_vectorizer
 from feature_extraction.nela_transformer import nela_vectorizer
+from feature_extraction.morality_transformer import morality_vectorizer
+from feature_extraction.bias_transformer import bias_vectorizer
 
 class features:
     def __init__(self, train):
@@ -63,3 +65,11 @@ class features:
     def extract_nela_features(self,ds):
         vectorizer = nela_vectorizer()
         return vectorizer
+
+    def extract_morality_features(self,ds):
+        vectorizer = morality_vectorizer()
+        return vectorizer
+
+    def extract_bias_features(self,ds):
+        vecrotizer = bias_vectorizer()
+        return vecrotizer
