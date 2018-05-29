@@ -88,6 +88,12 @@ def list_sources_in_ds(ds_file):
     print(nonprop_sources)
     return prop_sources,nonprop_sources
 
+def print_scores(f_score, accuracy):
+    print ("F1 score:")
+    print (f_score)
+    print ("Accuarcy :")
+    print (accuracy)
+
 def custom_evaluate(ds,source_list):
     print('████████████████  CUSTOM EVALUATION  ████████████████')
     # F1 score
@@ -96,41 +102,50 @@ def custom_evaluate(ds,source_list):
 
     positive_insource_instances = []
     positive_outsource_instances = []
+    all_negative_instances=[]
+    all_positive_instances=[]
     for doc in ds:
         if doc.gold_label == '1':
+            all_positive_instances.append(doc)
             if doc.source in source_list:
                 positive_insource_instances.append(doc)
             else:
                 positive_outsource_instances.append(doc)
+        else:
+            all_negative_instances.append(doc)
 
-    insource_pos_y_pred = [doc.prediction for doc in positive_insource_instances]
-    insource_pos_y_gold = [doc.gold_label for doc in positive_insource_instances]
-    outsource_pos_y_pred = [doc.prediction for doc in positive_outsource_instances]
-    outsource_pos_y_gold = [doc.gold_label for doc in positive_outsource_instances]
-
+    insource_pos_pred = [doc.prediction for doc in positive_insource_instances]
+    insource_pos_gold = [doc.gold_label for doc in positive_insource_instances]
+    outsource_pos_pred = [doc.prediction for doc in positive_outsource_instances]
+    outsource_pos_gold = [doc.gold_label for doc in positive_outsource_instances]
+    all_pos_pred = [doc.prediction for doc in all_positive_instances]
+    all_pos_gold = [doc.gold_label for doc in all_positive_instances]
+    all_neg_pred = [doc.prediction for doc in all_negative_instances]
+    all_neg_gold = [doc.gold_label for doc in all_negative_instances]
     print ('Evaluation on all instances:')
     f_score = f1_score(y_true, y_pred, average='macro')  # calculating F1 score
     accuracy = accuracy_score(y_true, y_pred)
-    print ("F1 score:")
-    print (f_score)
-    print ("Accuarcy :")
-    print (accuracy)
+    print_scores(f_score,accuracy)
 
     print ('Evaluation on in-source positive instances only: ')
-    f_score = f1_score(insource_pos_y_gold, insource_pos_y_pred, average='macro')  # calculating F1 score
-    accuracy = accuracy_score(insource_pos_y_gold, insource_pos_y_pred)
-    print ("F1 score:")
-    print (f_score)
-    print ("Accuarcy :")
-    print (accuracy)
+    f_score = f1_score(insource_pos_gold, insource_pos_pred, average='macro')  # calculating F1 score
+    accuracy = accuracy_score(insource_pos_gold, insource_pos_pred)
+    print_scores(f_score, accuracy)
 
     print ('Evaluation on out-source positive instances only:')
-    f_score = f1_score(outsource_pos_y_gold, outsource_pos_y_pred, average='macro')  # calculating F1 score
-    accuracy = accuracy_score(outsource_pos_y_gold, outsource_pos_y_pred)
-    print ("F1 score:")
-    print (f_score)
-    print ("Accuarcy :")
-    print (accuracy)
+    f_score = f1_score(outsource_pos_gold, outsource_pos_pred, average='macro')  # calculating F1 score
+    accuracy = accuracy_score(outsource_pos_gold, outsource_pos_pred)
+    print_scores(f_score, accuracy)
+
+    print ('Evaluation on all positive instances only:')
+    f_score = f1_score(all_pos_gold, all_pos_pred, average='macro')  # calculating F1 score
+    accuracy = accuracy_score(all_pos_gold, all_pos_pred)
+    print_scores(f_score, accuracy)
+
+    print ('Evaluation on all negative instances only:')
+    f_score = f1_score(all_neg_gold, all_neg_pred, average='macro')  # calculating F1 score
+    accuracy = accuracy_score(all_neg_gold, all_neg_pred)
+    print_scores(f_score, accuracy)
 
 def main(opts):
    # list_sources_in_ds('../data/test.dist.converted.txt')
