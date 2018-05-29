@@ -52,7 +52,7 @@ def create_dataset(ds_file,sources,random_sources,new_ds_file):
                     assert (fields[-1] == '-1')
                     out.write(line+'\n')
                     articles_from_random+=1
-                    if articles_from_random == articles_from_sources:
+                    if articles_from_random == 9*articles_from_sources:
                         print ("number of articles from selected sources is: "+ str(articles_from_sources))
                         print ("number of articles from random sources is :"+str(articles_from_random))
                         f.close()
@@ -66,7 +66,8 @@ def list_sources_in_ds(ds_file):
     prop_sources = dict()
     nonprop_sources =dict()
     with codecs.open(ds_file, 'r', encoding='utf8') as f:
-        for line in f:
+        lines = f.readlines()
+        for line in lines:
             line = line.strip()
             fields = line.split('\t')
             if fields[-1] == '1':
@@ -85,9 +86,45 @@ def list_sources_in_ds(ds_file):
     print(nonprop_sources)
     return prop_sources,nonprop_sources
 
+def custom_evaluate(ds,source_list):
+    print('████████████████  CUSTOM EVALUATION  ████████████████')
+    # F1 score
+    y_true = [doc.gold_label for doc in ds]  # getting all gold labels of the ds as one list
+    y_pred = [doc.prediction for doc in ds]  # getting all model predicted lebels as a list
+    positive_insource_instances = [doc for d in ds if d.gold_label=='1' and d.source in source_list]
+    positive_outsource_instances =[doc for d in ds if d.gold_label=='1' and d.source not in source_list]
+
+    insource_pos_y_pred = [doc.prediction for doc in positive_insource_instances]
+    insource_pos_y_gold = [doc.gold_label for doc in positive_insource_instances]
+    outsource_pos_y_pred = [doc.prediction for doc in positive_outsource_instances]
+    outsource_pos_y_gold = [doc.gold_label for doc in positive_outsource_instances]
+
+    print ('Evaluation on all instances:')
+    f_score = f1_score(y_true, y_pred, average='macro')  # calculating F1 score
+    accuracy = accuracy_score(y_true, y_pred)
+    print ("F1 score:")
+    print (f_score)
+    print ("Accuarcy :")
+    print (accuracy)
+
+    print ('Evaluation on in-source positive instances only: ')
+    f_score = f1_score(insource_pos_y_gold, insource_pos_y_pred, average='macro')  # calculating F1 score
+    accuracy = accuracy_score(insource_pos_y_gold, insource_pos_y_pred)
+    print ("F1 score:")
+    print (f_score)
+    print ("Accuarcy :")
+    print (accuracy)
+
+    print ('Evaluation on out-source positive instances only:')
+    f_score = f1_score(outsource_pos_y_gold, outsource_pos_y_pred, average='macro')  # calculating F1 score
+    accuracy = accuracy_score(outsource_pos_y_gold, outsource_pos_y_pred)
+    print ("F1 score:")
+    print (f_score)
+    print ("Accuarcy :")
+    print (accuracy)
 
 def main(opts):
-    list_sources_in_ds('../data/train.json.converted.txt')
+    list_sources_in_ds('../data/test.dist.converted.txt')
     param = parse_parameters(opts)  # get parameters from command
     selected_sources = param['sources'].split(',')
     prop_sources,nonprop_sources = list_sources_in_ds(param['train'])
@@ -103,18 +140,16 @@ def main(opts):
     tested_dev = test_model(dev, feats, 'test',param['pred'])  # testing the model with the dev ds
     tested_test = test_model(test, feats, 'dev',param['pred'])  # testing the model with the test ds
 
-    print ('evaluating the model using dev ds ...')
-    evaluate_model(tested_dev)  # evaluating the model on the dev
-    print ('evaluating the model using test ds ...')
-    evaluate_model(tested_test)  # evaluating the model on the test
-
-
+    print ('evaluating the model on dev ds ...')
+    custom_evaluate(tested_dev,selected_sources)
+    print ('evaluating the model on test ds ...')
+    custom_evaluate(tested_test,selected_sources)
 
 if __name__ == '__main__':
     optparser = optparse.OptionParser()
 
     optparser.add_option(
-        "-s", "--sources", default ='https://remnantnewspaper.com,http://personalliberty.com/,http://www.frontpagemag.com/',
+        "-s", "--sources", default ='http://www.shtfplan.com/' ,
         help="list of selected propagandistic sources, type each source URL separated by a comma"
     )
     optparser.add_option(

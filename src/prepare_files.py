@@ -146,10 +146,68 @@ def remove_redundants(ds_file):
             print ('Number of articles after filtering = '+ str(len(ids)))
 
 
+def distribute_sources(train_file,dev_file,test_file):
+    sources = dict()
+    with codecs.open(train_file,'r',encoding='utf8') as f_train:
+        with codecs.open(dev_file,'r',encoding='utf8') as f_dev:
+            with codecs.open(test_file,'r',encoding='utf8') as f_test:
+                with codecs.open('train.dist.converted.txt', 'w', encoding='utf8') as train_out:
+                    with codecs.open('dev.dist.converted.txt','w', encoding='utf8') as dev_out:
+                        with codecs.open('test.dist.converted.txt','w',encoding='utf8') as test_out:
+                            train_lines = f_train.readlines()
+                            dev_lines = f_dev.readlines()
+                            test_lines = f_test.readlines()
+                            all_lines= train_lines+dev_lines+test_lines
+                            for line in all_lines:
+                                line =line.strip()
+                                fields = line.split('\t')
+                                if fields[-2] not in sources:         #fields[-2] is the source of the article
+                                    sources[fields[-2]] =[]
+                                    sources[fields[-2]].append(line)
+                                else:
+                                    sources[fields[-2]].append(line)
+                            train_articles = []
+                            test_articles =[]
+                            dev_articles =[]
+                            for article_set in sources:
+                                seventy_percent = len(sources[article_set]) * 0.7
+                                eighty_percent = len(sources[article_set]) * 0.8
+                                print ('source: (' +article_set+') has '+ str(len(sources[article_set])) + ' articles')
+                                print('70% of those is : ' + str(seventy_percent))
+                                for i, article in enumerate(sources[article_set]):
+                                    train_articles.append(article)
+                                    i += 1
+                                    if i >= seventy_percent:
+                                        break
+
+                                print('10% of those is : ' + str(eighty_percent - seventy_percent))
+                                for i, article in enumerate(sources[article_set]):
+                                    if i > seventy_percent and i <= eighty_percent:
+                                        dev_articles.append(article)
+                                    i += 1
+
+                                print('20% of those is : ' + str(len(sources[article_set]) - eighty_percent))
+                                for i, article in enumerate(sources[article_set]):
+                                    if i > eighty_percent:
+                                        test_articles.append(article)
+                                    i += 1
+                            for a in train_articles:
+                                train_out.write(a+'\n')
+                            train_out.close()
+                            for a in dev_articles:
+                                dev_out.write(a+'\n')
+                            dev_out.close()
+                            for a in test_articles:
+                                test_out.write(a+'\n')
+                            test_out.close()
 
 
+
+
+
+distribute_sources('../data/train.json.converted.txt','../data/dev.json.converted.txt','../data/test.json.converted.txt')
 #remove_redundants('../data/train.json.converted.txt')
-rashkan_statistics('../data/test.txtconverted.txt')
+#rashkan_statistics('../data/test.txtconverted.txt')
 #from_josn_to_tsv('../data/test.json')
 #separate_liwc_lexicons('../data/lexicons/LIWC/LIWC2015_English.txt')
 #separate_subjectives('../data/lexicons/subjectivity_clues_hltemnlp05/subjectivity_clues_hltemnlp05/subjclueslen1-HLTEMNLP05.txt')

@@ -121,16 +121,18 @@ def extract_features(ds, feats):
     #lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
     #readability_features = feats.extract_readability_features(ds)
     #nela_features = feats.extract_nela_features(ds)
-    morality =  feats.extract_morality_features(ds)
-    bias = feats.extract_bias_features(ds)
+    #morality =  feats.extract_morality_features(ds)
+    #bias = feats.extract_bias_features(ds)
+    #char_n_g = feats.extract_char_n_grams()
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
+    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf)
+                                        #('char-n-g',char_n_g),
                                         #('lexical', lexical),
                                         #('lexicalstyle', lexicalstyle_features),
                                         #('readability', readability_features),
-                                        #('nela', nela_features)
-                                        ('morality', morality),
-                                        ('bias', bias)
+                                        #('nela', nela_features),
+                                        #('morality', morality),
+                                        #('bias', bias)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
@@ -242,15 +244,15 @@ if __name__ == '__main__':
     #     help="xtrain set path"
     # )
     optparser.add_option(
-        "-T", "--xtrain", default="../data/sample.txt",  # "../data/xtrain.txt"
+        "-T", "--xtrain", default="../data/train.json.converted.txt",  # "../data/xtrain.txt"
         help="xtrain set path"
     )
     optparser.add_option(
-        "-D", "--xdev", default="../data/sample.txt",  # "../data/xdev.txt"
+        "-D", "--xdev", default="../data/dev.json.converted.txt",  # "../data/xdev.txt"
         help="xdev set path"
     )
     optparser.add_option(
-        "-t", "--test", default="../data/sample.txt",  # "../data/test.txtconverted.txt"
+        "-t", "--test", default="../data/test.json.converted.txt",  # "../data/test.txtconverted.txt"
         help="test set path"
     )
 
