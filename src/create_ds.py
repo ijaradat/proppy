@@ -123,27 +123,27 @@ def custom_evaluate(ds,source_list):
     all_neg_pred = [doc.prediction for doc in all_negative_instances]
     all_neg_gold = [doc.gold_label for doc in all_negative_instances]
     print ('Evaluation on all instances:')
-    f_score = f1_score(y_true, y_pred)  # calculating F1 score
+    f_score = f1_score(y_true, y_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(y_true, y_pred)
     print_scores(f_score,accuracy)
 
     print ('Evaluation on in-source positive instances only: ')
-    f_score = f1_score(insource_pos_gold, insource_pos_pred)  # calculating F1 score
+    f_score = f1_score(insource_pos_gold, insource_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(insource_pos_gold, insource_pos_pred)
     print_scores(f_score, accuracy)
 
     print ('Evaluation on out-source positive instances only:')
-    f_score = f1_score(outsource_pos_gold, outsource_pos_pred)  # calculating F1 score
+    f_score = f1_score(outsource_pos_gold, outsource_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(outsource_pos_gold, outsource_pos_pred)
     print_scores(f_score, accuracy)
 
     print ('Evaluation on all positive instances only:')
-    f_score = f1_score(all_pos_gold, all_pos_pred)  # calculating F1 score
+    f_score = f1_score(all_pos_gold, all_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(all_pos_gold, all_pos_pred)
     print_scores(f_score, accuracy)
 
     print ('Evaluation on all negative instances only:')
-    f_score = f1_score(all_neg_gold, all_neg_pred)  # calculating F1 score
+    f_score = f1_score(all_neg_gold, all_neg_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(all_neg_gold, all_neg_pred)
     print_scores(f_score, accuracy)
 
