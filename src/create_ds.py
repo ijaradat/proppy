@@ -15,7 +15,7 @@ def parse_parameters(opts):
     param['sources'] = opts.sources
     param['new'] = opts.new
     param['pred'] = opts.pred
-
+    param['fix']=opts.fix
     print ("PARAMETER LIST:_______________________________________________________________________")
     print (param)
 
@@ -32,7 +32,7 @@ def read_new_datsets(param):
 
 #this function creates a databse , half of it is from the list of sources provided as the second parameter,
 # the other half is from random non propagandistic sources
-def create_dataset(ds_file,sources,random_sources,new_ds_file):
+def create_dataset(ds_file,sources,random_sources,new_ds_file,fix_number=None):
     articles_from_sources=0
     articles_from_random =0
     with codecs.open(new_ds_file, 'w', encoding='utf8') as out:
@@ -45,6 +45,8 @@ def create_dataset(ds_file,sources,random_sources,new_ds_file):
                     assert (fields[-1] == '1')
                     out.write(line+'\n')
                     articles_from_sources+=1
+                    if fix_number != None and articles_from_sources >= fix_number:
+                        break
             for line in lines:
                 line =line.strip()
                 fields =line.split('\t')
@@ -137,7 +139,7 @@ def main(opts):
     prop_sources,nonprop_sources = list_sources_in_ds(param['train'])
     random_sources = nonprop_sources.keys()
 
-    create_dataset(param['train'],selected_sources,random_sources,param['new'])
+    create_dataset(param['train'],selected_sources,random_sources,param['new'],param['fix'])
     print('a new training dataset created at :'+ param['new'])
 
     new_train, dev, test = read_new_datsets(param)  # loading datsets as lists of document objects
@@ -159,6 +161,11 @@ if __name__ == '__main__':
     optparser.add_option(
         "-s", "--sources", default ='http://www.shtfplan.com/,https://www.lewrockwell.com/' ,
         help="list of selected propagandistic sources, type each source URL separated by a comma"
+    )
+    optparser.add_option(
+        "-f", "--fix", default =1500 ,
+        help="fix_number: number of propagandistic articles to collect from the given list of sources in parameter -s. NOTE: if the max no. of articles from the list od sources is \n actually less than the given (fix) it will return the max"
+
     )
     optparser.add_option(
         "-T", "--train", default="../data/train.dist.converted.txt",
