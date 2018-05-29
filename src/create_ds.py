@@ -67,25 +67,35 @@ def create_dataset(ds_file,sources,random_sources,new_ds_file,fix_number=None):
 def list_sources_in_ds(ds_file):
     prop_sources = dict()
     nonprop_sources =dict()
+    nonprop_articles =0
+    prop_articles =0
     with codecs.open(ds_file, 'r', encoding='utf8') as f:
         lines = f.readlines()
         for line in lines:
             line = line.strip()
             fields = line.split('\t')
             if fields[-1] == '1':
+                prop_articles+=1
                 if fields[-2] in prop_sources:
                     prop_sources[fields[-2]] += 1
                 else:
                     prop_sources[fields[-2]] = 1
             elif fields[-1] == '-1':
+                nonprop_articles+=1
                 if fields[-2] in nonprop_sources:
                     nonprop_sources[fields[-2]] += 1
                 else:
                     nonprop_sources[fields[-2]] = 1
     print("Propagandistic sources statistics:______________________________________________________")
     print(prop_sources)
+    print('TOTAL = '+str(len(prop_sources)))
     print("Non propagandistic sources statistics:__________________________________________________")
     print(nonprop_sources)
+    print('TOTAL = ' + str(len(nonprop_sources)))
+    print("Non Propagandistic articles statistics:______________________________________________________")
+    print('TOTAL = '+str(nonprop_articles))
+    print("Propagandistic articles statistics:__________________________________________________")
+    print('TOTAL = ' + str(prop_articles))
     return prop_sources,nonprop_sources
 
 def print_scores(f_score, accuracy):
@@ -148,7 +158,7 @@ def custom_evaluate(ds,source_list):
     print_scores(f_score, accuracy)
 
 def main(opts):
-   # list_sources_in_ds('../data/test.dist.converted.txt')
+    #list_sources_in_ds('../data/test.dist.converted.txt')
     param = parse_parameters(opts)  # get parameters from command
     selected_sources = param['sources'].split(',')
     prop_sources,nonprop_sources = list_sources_in_ds(param['train'])
@@ -178,7 +188,7 @@ if __name__ == '__main__':
         help="list of selected propagandistic sources, type each source URL separated by a comma"
     )
     optparser.add_option(
-        "-f", "--fix", default =1500 ,
+        "-f", "--fix", default =None,
         help="fix_number: number of propagandistic articles to collect from the given list of sources in parameter -s. NOTE: if the max no. of articles from the list od sources is \n actually less than the given (fix) it will return the max"
 
     )
