@@ -91,8 +91,15 @@ def custom_evaluate(ds,source_list):
     # F1 score
     y_true = [doc.gold_label for doc in ds]  # getting all gold labels of the ds as one list
     y_pred = [doc.prediction for doc in ds]  # getting all model predicted lebels as a list
-    positive_insource_instances = [doc for d in ds if d.gold_label=='1' and d.source in source_list]
-    positive_outsource_instances =[doc for d in ds if d.gold_label=='1' and d.source not in source_list]
+
+    positive_insource_instances = []
+    positive_outsource_instances = []
+    for doc in ds:
+        if doc.gold_label == '1':
+            if doc.source in source_list:
+                positive_insource_instances.append(doc)
+            else:
+                positive_outsource_instances.append(doc)
 
     insource_pos_y_pred = [doc.prediction for doc in positive_insource_instances]
     insource_pos_y_gold = [doc.gold_label for doc in positive_insource_instances]
@@ -124,13 +131,14 @@ def custom_evaluate(ds,source_list):
     print (accuracy)
 
 def main(opts):
-    list_sources_in_ds('../data/test.dist.converted.txt')
+   # list_sources_in_ds('../data/test.dist.converted.txt')
     param = parse_parameters(opts)  # get parameters from command
     selected_sources = param['sources'].split(',')
     prop_sources,nonprop_sources = list_sources_in_ds(param['train'])
     random_sources = nonprop_sources.keys()
 
     create_dataset(param['train'],selected_sources,random_sources,param['new'])
+    print('a new training dataset created at :'+ param['new'])
 
     new_train, dev, test = read_new_datsets(param)  # loading datsets as lists of document objects
     feats = features(new_train)  # creating an object from the class features to initialize important global variables such as lexicons and training ds
@@ -149,19 +157,19 @@ if __name__ == '__main__':
     optparser = optparse.OptionParser()
 
     optparser.add_option(
-        "-s", "--sources", default ='http://www.shtfplan.com/' ,
+        "-s", "--sources", default ='http://www.shtfplan.com/,https://www.lewrockwell.com/' ,
         help="list of selected propagandistic sources, type each source URL separated by a comma"
     )
     optparser.add_option(
-        "-T", "--train", default="../data/train.json.converted.txt",
+        "-T", "--train", default="../data/train.dist.converted.txt",
         help="train ds path"
     )
     optparser.add_option(
-        "-d", "--dev", default="../data/dev.json.converted.txt",
+        "-d", "--dev", default="../data/dev.dist.converted.txt",
         help="dev ds path"
     )
     optparser.add_option(
-        "-t", "--test", default="../data/test.json.converted.txt",
+        "-t", "--test", default="../data/test.dist.converted.txt",
         help="test ds path"
     )
     optparser.add_option(
