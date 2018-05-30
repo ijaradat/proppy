@@ -18,7 +18,7 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.ensemble import ExtraTreesClassifier
 import json
-
+import datetime
 
 maxabs_scaler = MaxAbsScaler()
 
@@ -186,10 +186,11 @@ def train_model(train, features_pipeline):
     #pickle.dump(Y, open("train_gold.pickle", "wb"))  # dump it (to speed up exp.)
     print ('fitting the model according to given data ...')
     model.fit(X, Y)
-
-    joblib.dump(model, 'maxentr_model.pkl') #pickle the model
-    print ('model pickled at : maxentr_model.pkl ')
-
+    now= datetime.datetime.now().strftime("%I:%M%S%p-%B-%d-%Y")
+    model_file_name= now+'maxentr_model.pkl'
+    joblib.dump(model,model_file_name ) #pickle the model
+    print ('model pickled at : '+ model_file_name)
+    return model_file_name
     # print ('features importance :')
     # coefs = model.coef_[0]
     # feature_list = sorted([ (coefs[i], feature) for i, feature in enumerate(features_pipeline.get_feature_names()) ])
@@ -197,12 +198,12 @@ def train_model(train, features_pipeline):
 
 
 
-def test_model(ds, ds_name, features_pipeline, predictions_file = '../data/predictions-'):
+def test_model(ds, ds_name, features_pipeline, model_file, predictions_file = '../data/predictions-'):
     print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
     #features_pipeline= construct_pipeline(test, feats, param)  # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
-    print('loading pickled model from : maxentr_model.pkl ')
-    model = joblib.load('maxentr_model.pkl') #load the pickled model
+    print('loading pickled model from : '+ model_file)
+    model = joblib.load(model_file) #load the pickled model
     X = features_pipeline.transform([doc.text for doc in ds])  # calling transform method of each transformer in the features pipeline to transform data into vectors of features
     X = maxabs_scaler.transform(X)
     #print ('maximum absolute values :')
@@ -257,13 +258,13 @@ def main (opts):
     #select_features(xtrain, feats)  # feature selection and importance
 
     train_pipeline = construct_pipeline(xtrain, feats, param)
-    train_model(xtrain, train_pipeline)  # training the model
+    model_file = train_model(xtrain, train_pipeline)  # training the model
 
     dev_pipeline = construct_pipeline(xdev,feats,param)
-    tested_dev = test_model(xdev, 'test', dev_pipeline)  #testing the model with the dev ds
+    tested_dev = test_model(xdev, 'test', dev_pipeline, model_file)  #testing the model with the dev ds
 
     test_pipeline = construct_pipeline(test,feats,param)
-    tested_test = test_model(test,'dev', test_pipeline)  #testing the model with the test ds
+    tested_test = test_model(test,'dev', test_pipeline, model_file)  #testing the model with the test ds
 
     print ('evaluating the model using dev ds ...')
     evaluate_model(tested_dev, param['classification'])  # evaluating the model on the dev

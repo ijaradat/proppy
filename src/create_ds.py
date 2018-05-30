@@ -217,13 +217,13 @@ def main(opts):
     feats = features(new_train)  # creating an object from the class features to initialize important global variables such as lexicons and training ds
 
     train_pipeline = construct_pipeline(new_train, feats, param)
-    train_model(new_train, train_pipeline)  # training the model
+    model_file =train_model(new_train, train_pipeline)  # training the model
 
     dev_pipeline = construct_pipeline(dev, feats, param)
-    tested_dev = test_model(dev, 'dev', dev_pipeline,param['pred'])  # testing the model with the dev ds
+    tested_dev = test_model(dev, 'dev', dev_pipeline,model_file,param['pred'])  # testing the model with the dev ds
 
     test_pipeline = construct_pipeline(test, feats, param)
-    tested_test = test_model(test, 'test', test_pipeline,param['pred'])
+    tested_test = test_model(test, 'test', test_pipeline,model_file ,param['pred'])
 
     print ('evaluating the model on dev ds ...')
     custom_evaluate(tested_dev,selected_sources)
@@ -264,9 +264,9 @@ if __name__ == '__main__':
     )
     optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =True,
                         help="compute tdidf word-n-grams features")
-    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= False,
+    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= True,
                         help="compute char n-grams features")
-    optparser.add_option("-L", "--lexical", action="store_true", default=False,
+    optparser.add_option("-L", "--lexical", action="store_true", default=True,
                         help="compute lexical features")
     optparser.add_option("-S", "--style", action="store_true", default=False,
                         help="compute lexical style features")
