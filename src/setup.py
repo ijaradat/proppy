@@ -40,7 +40,7 @@ def parse_parameters(opts):
     param['xdev'] = opts.xdev
     param['test'] = opts.test
     param['xtrain'] = opts.xtrain
-
+    param['classification'] =opts.classification
     print ("PARAMETER LIST:_______________________________________________________________________")
     print (param)
 
@@ -72,7 +72,7 @@ def load_myds(dataset_file):
     return dataset
 
 
-def load_dataset(dataset_file):
+def load_dataset(dataset_file, classification):
     print ('loading dataset: '+dataset_file+ ' ...')
     dataset =[]
     with codecs.open(dataset_file,'r') as f:
@@ -83,7 +83,10 @@ def load_dataset(dataset_file):
                 prop_gold = '1'
             else:
                 prop_gold= '-1'
-            article = document(fields[1],prop_gold,str(i),'')  #article = document(fields[1],fields[0],str(i),'')
+            if classification =='binary':
+                article = document(fields[1],prop_gold,str(i),'')
+            else:
+                article = document(fields[1], fields[0], str(i), '')
             dataset.append(article)
             i+=1
         f.close()
@@ -97,21 +100,21 @@ def read_datsets(param):
     elif param['xtrain'].endswith('.converted.txt'):
         xtrain = load_myds(param['xtrain'])
     else:
-        xtrain = load_dataset(param['xtrain'])
+        xtrain = load_dataset(param['xtrain'], param['classification'])
 
     if param['xdev'].endswith('.json'):
         xdev = load_json_dataset(param['xdev'])
     elif param['xdev'].endswith('.converted.txt'):
         xdev = load_myds(param['xdev'])
     else:
-        xdev = load_dataset(param['xdev'])
+        xdev = load_dataset(param['xdev'],param['classification'])
 
     if param['test'].endswith('.json'):
         test = load_json_dataset(param['test'])
     elif param['test'].endswith('.converted.txt'):
         test = load_myds(param['test'])
     else:
-        test = load_dataset(param['test'])
+        test = load_dataset(param['test'], param['classification'])
 
     print ('done reading data !')
     return xtrain,xdev,test
@@ -209,15 +212,22 @@ def test_model(test, feats, ds_name, predictions_file = '../data/predictions-'):
     return test
 
 
-def evaluate_model(ds):
+def evaluate_model(ds, classification):
     print('████████████████  E V A L U A T I O N  ████████████████')
     # F1 score
     y_true = [doc.gold_label for doc in ds] # getting all gold labels of the ds as one list
     y_pred = [doc.prediction for doc in ds] # getting all model predicted lebels as a list
-    f_score = f1_score(y_true, y_pred, pos_label='1') # calculating F1 score
+    if classification =='binary':
+        f_score = f1_score(y_true, y_pred, pos_label='1') # calculating F1 score
+        precision = precision_score(y_true, y_pred, pos_label='1')
+        recall = recall_score(y_true, y_pred, pos_label='1')
+    else:
+        f_score = f1_score(y_true, y_pred, average='macro') # calculating F1 score
+        precision = precision_score(y_true, y_pred, average='macro')
+        recall = recall_score(y_true, y_pred, average='macro')
+
     accuracy = accuracy_score(y_true, y_pred)
-    precision = precision_score(y_true, y_pred, pos_label='1')
-    recall = recall_score(y_true, y_pred, pos_label='1')
+
     print ("F1 score:")
     print (f_score)
     print ("Accuarcy :")
@@ -241,17 +251,17 @@ def main (opts):
     tested_test = test_model(test, feats,'dev')  #testing the model with the test ds
 
     print ('evaluating the model using dev ds ...')
-    evaluate_model(tested_dev)  # evaluating the model on the dev
+    evaluate_model(tested_dev, param['classification'])  # evaluating the model on the dev
     print ('evaluating the model using test ds ...')
-    evaluate_model(tested_test)  #evaluating the model on the test
+    evaluate_model(tested_test, param['classification'])  #evaluating the model on the test
 
 if __name__ == '__main__':
     optparser = optparse.OptionParser()
 
-    # optparser.add_option(
-    #     "-i", "--input", default="../data/sample.txt", # "../data/xtrain.txt"
-    #     help="xtrain set path"
-    # )
+    optparser.add_option(
+        "-c", "--classification", default="binary",
+        help="experiment type : 'multilabel' or  'binary' classification. i.e prop vs others or 4 classes"
+    )
     optparser.add_option(
         "-T", "--xtrain", default="../data/xtrain.txt.filtered.txt",  # "../data/xtrain.txt"
         help="xtrain set path"
@@ -264,6 +274,7 @@ if __name__ == '__main__':
         "-t", "--test", default="../data/xtest.txt.filtered.txt",  # "../data/test.txtconverted.txt"
         help="test set path"
     )
+
 
     opts = optparser.parse_args()[0]
 
