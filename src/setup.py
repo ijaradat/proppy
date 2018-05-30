@@ -41,6 +41,12 @@ def parse_parameters(opts):
     param['test'] = opts.test
     param['xtrain'] = opts.xtrain
     param['classification'] =opts.classification
+    param['baseline'] = opts.baseline
+    param['char_grams'] = opts.char_grams
+    param['lexical'] = opts.lexical
+    param['style'] = opts.style
+    param['readability'] = opts.readability
+    param['nela'] = opts.nela
     print ("PARAMETER LIST:_______________________________________________________________________")
     print (param)
 
@@ -120,27 +126,32 @@ def read_datsets(param):
     return xtrain,xdev,test
 
 
-def extract_features(ds, feats):
-
+def construct_pipeline(ds, feats, param):
+    feature_set =[]
     print('constructing features pipeline ...')
-    tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
-    lexical = feats.extract_lexical(ds)
-    lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
-    readability_features = feats.extract_readability_features(ds)
-    #nela_features = feats.extract_nela_features(ds)
-    #morality =  feats.extract_morality_features(ds)
-    #bias = feats.extract_bias_features(ds)
-    char_n_g = feats.extract_char_n_grams(ds)
+
+    if param['baseline'] == True:
+        tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
+        feature_set.append(('tf-idf',tfidf))
+    if param['char_grams'] == True:
+        char_n_g = feats.extract_char_n_grams(ds)
+        feature_set.append(('char-n-g',char_n_g))
+    if param['lexical'] == True:
+        lexical = feats.extract_lexical(ds)
+        feature_set.append(('lexical', lexical))
+    if param['style'] == True:
+        lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
+        feature_set.append(('lexicalstyle', lexicalstyle_features))
+    if param['readability'] == True:
+        readability_features = feats.extract_readability_features(ds)
+        feature_set.append( ('readability', readability_features))
+    if param['nela'] == True:
+        nela_features = feats.extract_nela_features(ds)
+        feature_set.appen(('nela', nela_features))
+
+
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
-                                        ('char-n-g',char_n_g),
-                                        ('lexical', lexical),
-                                        ('lexicalstyle', lexicalstyle_features),
-                                        ('readability', readability_features)
-                                        #('nela', nela_features)
-                                        #('morality', morality),
-                                        #('bias', bias)
-                                        ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
+    features_pipeline =  FeatureUnion(feature_set)  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
     print ('features pipeline ready !')
     return  features_pipeline
 
@@ -155,9 +166,9 @@ def select_features(train, feats):
     print(model.feature_importances_)  # display the relative importance of each attribute
 
 
-def train_model(train, feats):
+def train_model(train, features_pipeline):
     print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
-    features_pipeline = extract_features(train, feats) # call the methods that extract features to initialize transformers
+    #features_pipeline = construct_pipeline(train, feats, param) # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
 
     model = LogisticRegression(penalty='l2', class_weight='balanced') # creating an object from the max entropy with L2 regulariation
@@ -186,13 +197,13 @@ def train_model(train, feats):
 
 
 
-def test_model(test, feats, ds_name, predictions_file = '../data/predictions-'):
+def test_model(ds, ds_name, features_pipeline, predictions_file = '../data/predictions-'):
     print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
-    features_pipeline= extract_features(test, feats)  # call the methods that extract features to initialize transformers
+    #features_pipeline= construct_pipeline(test, feats, param)  # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
     print('loading pickled model from : maxentr_model.pkl ')
     model = joblib.load('maxentr_model.pkl') #load the pickled model
-    X = features_pipeline.transform([doc.text for doc in test])  # calling transform method of each transformer in the features pipeline to transform data into vectors of features
+    X = features_pipeline.transform([doc.text for doc in ds])  # calling transform method of each transformer in the features pipeline to transform data into vectors of features
     X = maxabs_scaler.transform(X)
     #print ('maximum absolute values :')
     #max_vals = np.amax(X, axis=0)
@@ -202,14 +213,14 @@ def test_model(test, feats, ds_name, predictions_file = '../data/predictions-'):
     #X = pickle.load('test_features.pickle')
     print ('predicting Y for each given X in test ...')
     Y_ = model.predict(X)  # predicting the labels in this ds via the trained model loaded in the variable 'model'
-    for i, doc in enumerate(test):
+    for i, doc in enumerate(ds):
         doc.prediction  = Y_[i]
 
-    with codecs.open(predictions_file+ds_name+'.txt', 'w',encoding='utf8') as out:
+    with codecs.open(predictions_file+'-'+ds_name+'.txt', 'w',encoding='utf8') as out:
         out.write('document_id\tsource_URL\tgold_label\tprediction\n')
-        for doc in test:
+        for doc in ds:
             out.write(str(doc.id)+'\t'+str(doc.source)+'\t'+doc.gold_label+'\t'+doc.prediction+'\n')
-    return test
+    return ds
 
 
 def evaluate_model(ds, classification):
@@ -245,10 +256,14 @@ def main (opts):
     feats = features(xtrain)  # creating an object from the class features to initialize important global variables such as lexicons and training ds
     #select_features(xtrain, feats)  # feature selection and importance
 
-    train_model(xtrain, feats)  # training the model
+    train_pipeline = construct_pipeline(xtrain, feats, param)
+    train_model(xtrain, train_pipeline)  # training the model
 
-    tested_dev = test_model(xdev, feats,'test')  #testing the model with the dev ds
-    tested_test = test_model(test, feats,'dev')  #testing the model with the test ds
+    dev_pipeline = construct_pipeline(xdev,feats,param)
+    tested_dev = test_model(xdev, 'test', dev_pipeline)  #testing the model with the dev ds
+
+    test_pipeline = construct_pipeline(test,feats,param)
+    tested_test = test_model(test,'dev', test_pipeline)  #testing the model with the test ds
 
     print ('evaluating the model using dev ds ...')
     evaluate_model(tested_dev, param['classification'])  # evaluating the model on the dev
@@ -263,18 +278,29 @@ if __name__ == '__main__':
         help="experiment type : 'multilabel' or  'binary' classification. i.e prop vs others or 4 classes"
     )
     optparser.add_option(
-        "-T", "--xtrain", default="../data/xtrain.txt.filtered.txt",  # "../data/xtrain.txt"
+        "-T", "--xtrain", default="../data/sample.txt",  # "xtrain.txt.filtered.txt"
         help="xtrain set path"
     )
     optparser.add_option(
-        "-D", "--xdev", default="../data/xdev.txt.filtered.txt",  # "../data/xdev.txt"
+        "-D", "--xdev", default="../data/sample.txt",  # "xdev.txt.filtered.txt"
         help="xdev set path"
     )
     optparser.add_option(
-        "-t", "--test", default="../data/xtest.txt.filtered.txt",  # "../data/test.txtconverted.txt"
+        "-t", "--test", default="../data/sample.txt",  # "xtest.txt.filtered.txt"
         help="test set path"
     )
-
+    optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =True,
+                        help="compute tdidf word-n-grams features")
+    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= False,
+                        help="compute char n-grams features")
+    optparser.add_option("-L", "--lexical", action="store_true", default=False,
+                        help="compute lexical features")
+    optparser.add_option("-S", "--style", action="store_true", default=True,
+                        help="compute lexical style features")
+    optparser.add_option("-R", "--readability", action="store_true", default=False,
+                        help="compute readability features")
+    optparser.add_option("-N", "--nela", action="store_true", default=False,
+                        help="compute Nela features")
 
     opts = optparser.parse_args()[0]
 

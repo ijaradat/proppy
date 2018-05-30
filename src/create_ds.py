@@ -16,6 +16,13 @@ def parse_parameters(opts):
     param['new'] = opts.new
     param['pred'] = opts.pred
     param['fix']=opts.fix
+    param['baseline'] = opts.baseline
+    param['char_grams'] = opts.char_grams
+    param['lexical'] = opts.lexical
+    param['style'] = opts.style
+    param['readability'] = opts.readability
+    param['nela'] = opts.nela
+
     print ("PARAMETER LIST:_______________________________________________________________________")
     print (param)
 
@@ -29,6 +36,8 @@ def read_new_datsets(param):
     test = load_myds(param['test'])
     print ('done reading data !')
     return train,dev,test
+
+
 
 #this function creates a databse , half of it is from the list of sources provided as the second parameter,
 # the other half is from random non propagandistic sources
@@ -184,10 +193,14 @@ def main(opts):
     new_train, dev, test = read_new_datsets(param)  # loading datsets as lists of document objects
     feats = features(new_train)  # creating an object from the class features to initialize important global variables such as lexicons and training ds
 
-    train_model(new_train, feats)  # training the model
+    train_pipeline = construct_pipeline(new_train, feats, param)
+    train_model(new_train, train_pipeline)  # training the model
 
-    tested_dev = test_model(dev, feats, 'test',param['pred'])  # testing the model with the dev ds
-    tested_test = test_model(test, feats, 'dev',param['pred'])  # testing the model with the test ds
+    dev_pipeline = construct_pipeline(dev, feats, param)
+    tested_dev = test_model(dev, 'dev', dev_pipeline,param['pred'])  # testing the model with the dev ds
+
+    test_pipeline = construct_pipeline(test, feats, param)
+    tested_test = test_model(test, 'test', test_pipeline,param['pred'])
 
     print ('evaluating the model on dev ds ...')
     custom_evaluate(tested_dev,selected_sources)
@@ -220,12 +233,24 @@ if __name__ == '__main__':
     )
     optparser.add_option(
         "-n", "--new", default="../data/new_train.txt",
-        help="path where the new train ds will be saved"
+        help="full path where the new train ds will be saved"
     )
     optparser.add_option(
-        "-p", "--pred", default="../data/predictions-",
-        help="path where the predictions file will be saved"
+        "-p", "--pred", default="../data/predictions",
+        help="full path where the predictions file will be saved: e.g:../data/predictions "
     )
+    optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =True,
+                        help="compute tdidf word-n-grams features")
+    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= False,
+                        help="compute char n-grams features")
+    optparser.add_option("-L", "--lexical", action="store_true", default=False,
+                        help="compute lexical features")
+    optparser.add_option("-S", "--style", action="store_true", default=False,
+                        help="compute lexical style features")
+    optparser.add_option("-R", "--readability", action="store_true", default=False,
+                        help="compute readability features")
+    optparser.add_option("-N", "--nela", action="store_true", default=False,
+                        help="compute Nela features")
 
     opts = optparser.parse_args()[0]
     main(opts)
