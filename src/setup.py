@@ -13,7 +13,7 @@ from features import *
 from document import document
 from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 from sklearn.pipeline import FeatureUnion
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.ensemble import ExtraTreesClassifier
@@ -79,7 +79,11 @@ def load_dataset(dataset_file):
         i=0
         for line in f:
             fields = line.split('\t')
-            article = document(fields[1],fields[0],str(i),'')
+            if fields[0]=='3':
+                prop_gold = '1'
+            else:
+                prop_gold= '-1'
+            article = document(fields[1],prop_gold,str(i),'')  #article = document(fields[1],fields[0],str(i),'')
             dataset.append(article)
             i+=1
         f.close()
@@ -117,20 +121,20 @@ def extract_features(ds, feats):
 
     print('constructing features pipeline ...')
     tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
-    #lexical = feats.extract_lexical(ds)
-    #lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
-    #readability_features = feats.extract_readability_features(ds)
+    lexical = feats.extract_lexical(ds)
+    lexicalstyle_features = feats.extract_lexicalstyle_features(ds)
+    readability_features = feats.extract_readability_features(ds)
     #nela_features = feats.extract_nela_features(ds)
     #morality =  feats.extract_morality_features(ds)
     #bias = feats.extract_bias_features(ds)
-    #char_n_g = feats.extract_char_n_grams()
+    char_n_g = feats.extract_char_n_grams(ds)
     # feature union is used from the sklearn pipeline class to concatenate features
-    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf)
-                                        #('char-n-g',char_n_g),
-                                        #('lexical', lexical),
-                                        #('lexicalstyle', lexicalstyle_features),
-                                        #('readability', readability_features),
-                                        #('nela', nela_features),
+    features_pipeline =  FeatureUnion([ ('tf-idf',tfidf),
+                                        ('char-n-g',char_n_g),
+                                        ('lexical', lexical),
+                                        ('lexicalstyle', lexicalstyle_features),
+                                        ('readability', readability_features)
+                                        #('nela', nela_features)
                                         #('morality', morality),
                                         #('bias', bias)
                                         ])  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
@@ -210,13 +214,18 @@ def evaluate_model(ds):
     # F1 score
     y_true = [doc.gold_label for doc in ds] # getting all gold labels of the ds as one list
     y_pred = [doc.prediction for doc in ds] # getting all model predicted lebels as a list
-    f_score = f1_score(y_true, y_pred, average='macro') # calculating F1 score
+    f_score = f1_score(y_true, y_pred, pos_label='1') # calculating F1 score
     accuracy = accuracy_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred, pos_label='1')
+    recall = recall_score(y_true, y_pred, pos_label='1')
     print ("F1 score:")
     print (f_score)
     print ("Accuarcy :")
     print (accuracy)
-
+    print ("Precision :")
+    print (precision)
+    print ("Recall :")
+    print (recall)
 
 def main (opts):
 
@@ -244,15 +253,15 @@ if __name__ == '__main__':
     #     help="xtrain set path"
     # )
     optparser.add_option(
-        "-T", "--xtrain", default="../data/train.json.converted.txt",  # "../data/xtrain.txt"
+        "-T", "--xtrain", default="../data/xtrain.txt.filtered.txt",  # "../data/xtrain.txt"
         help="xtrain set path"
     )
     optparser.add_option(
-        "-D", "--xdev", default="../data/dev.json.converted.txt",  # "../data/xdev.txt"
+        "-D", "--xdev", default="../data/xdev.txt.filtered.txt",  # "../data/xdev.txt"
         help="xdev set path"
     )
     optparser.add_option(
-        "-t", "--test", default="../data/test.json.converted.txt",  # "../data/test.txtconverted.txt"
+        "-t", "--test", default="../data/xtest.txt.filtered.txt",  # "../data/test.txtconverted.txt"
         help="test set path"
     )
 

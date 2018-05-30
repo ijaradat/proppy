@@ -4,7 +4,7 @@
 import codecs
 from setup import *
 from features import *
-
+from sklearn.metrics import precision_score, recall_score
 def parse_parameters(opts):
 
     param = OrderedDict()
@@ -98,11 +98,15 @@ def list_sources_in_ds(ds_file):
     print('TOTAL = ' + str(prop_articles))
     return prop_sources,nonprop_sources
 
-def print_scores(f_score, accuracy):
+def print_scores(f_score, accuracy, precision, recall):
     print ("F1 score:")
     print (f_score)
     print ("Accuarcy :")
     print (accuracy)
+    print ("Precision :")
+    print (precision)
+    print ('Recall :')
+    print (recall)
 
 def custom_evaluate(ds,source_list):
     print('████████████████  CUSTOM EVALUATION  ████████████████')
@@ -135,27 +139,37 @@ def custom_evaluate(ds,source_list):
     print ('Evaluation on all instances:')
     f_score = f1_score(y_true, y_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(y_true, y_pred)
-    print_scores(f_score,accuracy)
+    precision = precision_score(y_true, y_pred, pos_label='1')
+    recall = recall_score(y_true, y_pred, pos_label='1')
+    print_scores(f_score,accuracy, precision, recall)
 
     print ('Evaluation on in-source positive instances only: ')
     f_score = f1_score(insource_pos_gold, insource_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(insource_pos_gold, insource_pos_pred)
-    print_scores(f_score, accuracy)
+    precision = precision_score(insource_pos_gold, insource_pos_pred, pos_label='1')
+    recall= recall_score(insource_pos_gold, insource_pos_pred, pos_label='1')
+    print_scores(f_score, accuracy, precision, recall)
 
     print ('Evaluation on out-source positive instances only:')
     f_score = f1_score(outsource_pos_gold, outsource_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(outsource_pos_gold, outsource_pos_pred)
-    print_scores(f_score, accuracy)
+    precision = precision_score(outsource_pos_gold, outsource_pos_pred, pos_label='1')
+    recall = recall_score(outsource_pos_gold, outsource_pos_pred, pos_label='1')
+    print_scores(f_score, accuracy, precision, recall)
 
     print ('Evaluation on all positive instances only:')
     f_score = f1_score(all_pos_gold, all_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(all_pos_gold, all_pos_pred)
-    print_scores(f_score, accuracy)
+    precision = precision_score(all_pos_gold, all_pos_pred, pos_label='1')
+    recall = recall_score(all_pos_gold, all_pos_pred, pos_label='1')
+    print_scores(f_score, accuracy, precision, recall)
 
     print ('Evaluation on all negative instances only:')
     f_score = f1_score(all_neg_gold, all_neg_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(all_neg_gold, all_neg_pred)
-    print_scores(f_score, accuracy)
+    precision = precision_score(all_neg_gold,all_neg_pred, pos_label='1')
+    recall =  recall_score(all_neg_gold, all_neg_pred, pos_label='1')
+    print_scores(f_score, accuracy, precision, recall)
 
 def main(opts):
     #list_sources_in_ds('../data/test.dist.converted.txt')
