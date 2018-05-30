@@ -37,35 +37,58 @@ def read_new_datsets(param):
     print ('done reading data !')
     return train,dev,test
 
+def get_all_articles_from_sources(sources,ds_lines):
+    propagandistic_articles = dict()
+    for line in ds_lines:
+        line= line.strip()
+        fields = line.split('\t')
+        if fields[-2] in sources:
+            assert (fields[-1] == '1')
+            if fields[-2] in propagandistic_articles:
+                propagandistic_articles[fields[-2]].append(line)
+            else:
+                propagandistic_articles[fields[-2]]=[]
+                propagandistic_articles[fields[-2]].append(line)
+    return propagandistic_articles
+
 
 
 #this function creates a databse , half of it is from the list of sources provided as the second parameter,
 # the other half is from random non propagandistic sources
-def create_dataset(ds_file,sources,random_sources,new_ds_file,fix_number=None):
-    articles_from_sources=0
-    articles_from_random =0
+def create_dataset(ds_file,sources,random_sources,new_ds_file,fix_number):
+
     with codecs.open(new_ds_file, 'w', encoding='utf8') as out:
         with codecs.open(ds_file, 'r', encoding='utf8') as f:
             lines = f.readlines()
-            for line in lines:
-                line= line.strip()
-                fields = line.split('\t')
-                if fields[-2] in sources:
-                    assert (fields[-1] == '1')
-                    out.write(line+'\n')
-                    articles_from_sources+=1
-                    if fix_number != None and articles_from_sources >= fix_number:
-                        break
+            articles_from_sources = get_all_articles_from_sources(sources,lines)
+            selected_articles =[]
+            if fix_number == None:
+                for set in articles_from_sources:
+                    for line in articles_from_sources[set]:
+                        selected_articles.append(line)
+            elif fix_number != None:
+                for set in articles_from_sources:
+                    count = 0
+                    for line in articles_from_sources[set]:
+                        selected_articles.append(line)
+                        count+=1
+                        if count >= fix_number:
+                            break
+
+            articles_from_sources_count = len (selected_articles)
+            for l in selected_articles:
+                out.write(l+'\n')
+            articles_from_random_count = 0
             for line in lines:
                 line =line.strip()
                 fields =line.split('\t')
                 if fields[-2] in random_sources:
                     assert (fields[-1] == '-1')
                     out.write(line+'\n')
-                    articles_from_random+=1
-                    if articles_from_random == 9*articles_from_sources:
-                        print ("number of articles from selected sources is: "+ str(articles_from_sources))
-                        print ("number of articles from random sources is :"+str(articles_from_random))
+                    articles_from_random_count+=1
+                    if articles_from_random_count == 9*articles_from_sources_count:
+                        print ("number of articles from selected sources is: "+ str(articles_from_sources_count))
+                        print ("number of articles from random sources is :"+str(articles_from_random_count))
                         f.close()
                         out.close()
                         break
@@ -216,7 +239,7 @@ if __name__ == '__main__':
     )
     optparser.add_option(
         "-f", "--fix", default =None,
-        help="fix_number: number of propagandistic articles to collect from the given list of sources in parameter -s. NOTE: if the max no. of articles from the list od sources is \n actually less than the given (fix) it will return the max"
+        help="fix_number: number of propagandistic articles to collect FROM EACH SOURCE given in the paramter -s. NOTE: if the max no. of articles from the list od sources is \n actually less than the given (fix) it will return the max"
 
     )
     optparser.add_option(
