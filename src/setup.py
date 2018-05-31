@@ -19,6 +19,7 @@ from sklearn.preprocessing import MaxAbsScaler
 from sklearn.ensemble import ExtraTreesClassifier
 import json
 import datetime
+import logging
 
 maxabs_scaler = MaxAbsScaler()
 
@@ -47,23 +48,23 @@ def parse_parameters(opts):
     param['style'] = opts.style
     param['readability'] = opts.readability
     param['nela'] = opts.nela
-    print ("PARAMETER LIST:_______________________________________________________________________")
-    print (param)
+    logging.info ("PARAMETER LIST:_______________________________________________________________________")
+    logging.info (param)
 
     return param
 
 def load_json_dataset (dataset_file):
-    print ('loading dataset: ' + dataset_file + ' ...')
+    logging.info ('loading dataset: ' + dataset_file + ' ...')
     dataset = []
     ds = json.load(open(dataset_file))
     for i, item in enumerate(ds):
         article = document(item['html_text'], item['propaganda_label'], item['gdlt_id'],item['mbfc_url'] )
         dataset.append(article)
-    print ('dataset loaded !')
+    logging.info ('dataset loaded !')
     return dataset
 
 def load_myds(dataset_file):
-    print ('loading dataset: ' + dataset_file + ' ...')
+    logging.info ('loading dataset: ' + dataset_file + ' ...')
     dataset = []
     with codecs.open(dataset_file, 'r', encoding='utf8') as f:
         i = 0
@@ -74,12 +75,12 @@ def load_myds(dataset_file):
             dataset.append(article)
             i += 1
         f.close()
-    print ('dataset loaded !')
+    logging.info('dataset loaded !')
     return dataset
 
 
 def load_dataset(dataset_file, classification):
-    print ('loading dataset: '+dataset_file+ ' ...')
+    logging.info ('loading dataset: '+dataset_file+ ' ...')
     dataset =[]
     with codecs.open(dataset_file,'r') as f:
         i=0
@@ -96,11 +97,11 @@ def load_dataset(dataset_file, classification):
             dataset.append(article)
             i+=1
         f.close()
-    print ('dataset loaded !')
+    logging.info ('dataset loaded !')
     return dataset
 
 def read_datsets(param):
-    print ('reading datasets ...')
+    logging.info ('reading datasets ...')
     if param['xtrain'].endswith('.json'):
         xtrain = load_json_dataset(param['xtrain'])
     elif param['xtrain'].endswith('.converted.txt'):
@@ -122,13 +123,13 @@ def read_datsets(param):
     else:
         test = load_dataset(param['test'], param['classification'])
 
-    print ('done reading data !')
+    logging.info ('done reading data !')
     return xtrain,xdev,test
 
 
 def construct_pipeline(ds, feats, param):
     feature_set =[]
-    print('constructing features pipeline ...')
+    logging.info('constructing features pipeline ...')
 
     if param['baseline'] == True:
         tfidf = feats.extract_baseline_feature(ds)  # each one of these is an sklearn object that has a transform method (each one is a transformer)
@@ -152,7 +153,7 @@ def construct_pipeline(ds, feats, param):
 
     # feature union is used from the sklearn pipeline class to concatenate features
     features_pipeline =  FeatureUnion(feature_set)  # Pipeline([('vectorizer', vec), ('vectorizer2', vec),....])
-    print ('features pipeline ready !')
+    logging.info ('features pipeline ready !')
     return  features_pipeline
 
 def select_features(train, feats):
@@ -167,29 +168,29 @@ def select_features(train, feats):
 
 
 def train_model(train, features_pipeline):
-    print ('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
+    logging.info('████████████████  𝕋 ℝ 𝔸 𝕀 ℕ 𝕀 ℕ 𝔾  ████████████████')
     #features_pipeline = construct_pipeline(train, feats, param) # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
 
     model = LogisticRegression(penalty='l2', class_weight='balanced') # creating an object from the max entropy with L2 regulariation
-    print "Computing features"
+    logging.info("Computing features")
     X = features_pipeline.transform([doc.text for doc in train]) # calling transform method of each transformer in the features pipeline to transform data into vectors of features
     X = maxabs_scaler.fit_transform(X)
     #print ('maximum absolute values :')
     max_vals = np.amax(X, axis=0) # get the max absolute value of each feature from all data examples
-    #print (max_vals)
+    print (max_vals)
     #print (max_vals[np.argsort(max_vals)[-10:]])  # get the 10 max values from the list of max abs value of each feature above
-    pickle.dump(X, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
+    #pickle.dump(X, open("train_features.pickle", "wb"))  # dump it (to speed up exp.)
     #X = pickle.load('train_features.pickle')
     #print "Saving features to file"
     Y = [doc.gold_label for doc in train]
     #pickle.dump(Y, open("train_gold.pickle", "wb"))  # dump it (to speed up exp.)
-    print ('fitting the model according to given data ...')
+    logging.info ('fitting the model according to given data ...')
     model.fit(X, Y)
     now= datetime.datetime.now().strftime("%I:%M%S%p-%B-%d-%Y")
     model_file_name= now+'maxentr_model.pkl'
     joblib.dump(model,model_file_name ) #pickle the model
-    print ('model pickled at : '+ model_file_name)
+    logging.info ('model pickled at : '+ model_file_name)
     return model_file_name
     # print ('features importance :')
     # coefs = model.coef_[0]
@@ -198,11 +199,11 @@ def train_model(train, features_pipeline):
 
 
 
-def test_model(ds, ds_name, features_pipeline, model_file, predictions_file = '../data/predictions-'):
-    print ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
+def test_model(ds, ds_name, features_pipeline, model_file):
+    logging.info ('████████████████   𝕋 𝔼 𝕊 𝕋 𝕀 ℕ 𝔾   ████████████████')
     #features_pipeline= construct_pipeline(test, feats, param)  # call the methods that extract features to initialize transformers
     # ( this method only initializes transformers, pipeline.transform below when called, it calls all transform methods of all tranformers in the pipeline)
-    print('loading pickled model from : '+ model_file)
+    logging.info('loading pickled model from : '+ model_file)
     model = joblib.load(model_file) #load the pickled model
     X = features_pipeline.transform([doc.text for doc in ds])  # calling transform method of each transformer in the features pipeline to transform data into vectors of features
     X = maxabs_scaler.transform(X)
@@ -212,12 +213,12 @@ def test_model(ds, ds_name, features_pipeline, model_file, predictions_file = '.
     #print (max_vals[np.argsort(max_vals)[-10:]])
     pickle.dump(X, open("test_features.pickle", "wb"))  # dump it (to speed up exp.)
     #X = pickle.load('test_features.pickle')
-    print ('predicting Y for each given X in test ...')
+    logging.info ('predicting Y for each given X in test ...')
     Y_ = model.predict(X)  # predicting the labels in this ds via the trained model loaded in the variable 'model'
     for i, doc in enumerate(ds):
         doc.prediction  = Y_[i]
 
-    with codecs.open(predictions_file+'-'+ds_name+'.txt', 'w',encoding='utf8') as out:
+    with codecs.open(model_file+'-predictions-'+ds_name+'.txt', 'w',encoding='utf8') as out:
         out.write('document_id\tsource_URL\tgold_label\tprediction\n')
         for doc in ds:
             out.write(str(doc.id)+'\t'+str(doc.source)+'\t'+doc.gold_label+'\t'+doc.prediction+'\n')
@@ -225,7 +226,7 @@ def test_model(ds, ds_name, features_pipeline, model_file, predictions_file = '.
 
 
 def evaluate_model(ds, classification):
-    print('████████████████  E V A L U A T I O N  ████████████████')
+    logging.info('████████████████  E V A L U A T I O N  ████████████████')
     # F1 score
     y_true = [doc.gold_label for doc in ds] # getting all gold labels of the ds as one list
     y_pred = [doc.prediction for doc in ds] # getting all model predicted lebels as a list
@@ -240,14 +241,14 @@ def evaluate_model(ds, classification):
 
     accuracy = accuracy_score(y_true, y_pred)
 
-    print ("F1 score:")
-    print (f_score)
-    print ("Accuarcy :")
-    print (accuracy)
-    print ("Precision :")
-    print (precision)
-    print ("Recall :")
-    print (recall)
+    logging.info ("F1 score:")
+    logging.info (f_score)
+    logging.info ("Accuarcy :")
+    logging.info (accuracy)
+    logging.info ("Precision :")
+    logging.info (precision)
+    logging.info ("Recall :")
+    logging.info (recall)
 
 def main (opts):
 
@@ -266,9 +267,9 @@ def main (opts):
     test_pipeline = construct_pipeline(test,feats,param)
     tested_test = test_model(test,'dev', test_pipeline, model_file)  #testing the model with the test ds
 
-    print ('evaluating the model using dev ds ...')
+    logging.info ('evaluating the model using dev ds ...')
     evaluate_model(tested_dev, param['classification'])  # evaluating the model on the dev
-    print ('evaluating the model using test ds ...')
+    logging.info ('evaluating the model using test ds ...')
     evaluate_model(tested_test, param['classification'])  #evaluating the model on the test
 
 if __name__ == '__main__':
