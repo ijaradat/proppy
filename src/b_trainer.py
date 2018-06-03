@@ -19,9 +19,8 @@ logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%
 def get_output_file_name(features_file):
     return features_file.replace(".features.pickle", ".mdl")
 
-
-def get_gold_labels(input_file):
-    dataset = read_datsets(input_file)  # loading dataset as lists of document objects
+def get_gold_labels(input_file, perform_multiclass=False):
+    dataset = read_datsets(input_file, perform_multiclass)  # loading dataset as lists of document objects
     Y = [doc.gold_label for doc in dataset]
     logging.info("Labels loaded from %s", input_file)
     return Y
@@ -37,7 +36,7 @@ def train_model(X, Y):
 
 def main(arguments):
     display_params(arguments)
-    Y = get_gold_labels(arguments['input'])
+    Y = get_gold_labels(arguments['input'], arguments['multi'])
 
     X = pickle.load(open(arguments['features'], 'rb'))  # todo not sure if this file is closed, as in with
     logging.info("Features loaded from %s", arguments['features'])
@@ -57,11 +56,14 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--feats", required=True,
                         help="input file with pre-computed features in pickle format (use a_feature_computer.py if you don't have this file)")
 
+    parser.add_argument("-m", "--multi", action="store_true", default=False,
+                        help="perform multi-class classification")
+
     arguments = parser.parse_args()
 
     param = OrderedDict()
     param['input'] = arguments.input
     param['features'] = arguments.feats
-
+    param['multi'] = arguments.multi
     main(param)
 
