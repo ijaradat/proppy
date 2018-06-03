@@ -56,7 +56,7 @@ def main(arguments):
     y_pred = model.predict(X)
     y_true = get_gold_labels(arguments['input'], arguments['multi'])
 
-    f_acc = evaluate_model(y_true, y_pred)
+    f_acc = evaluate_model(y_true, y_pred, arguments['multi'])
     print("\t".join(["F", "Acc", "P", "R"]))
     print(f_acc)
     output_file = get_predictions_file_name(arguments['features'])
