@@ -64,13 +64,18 @@ logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%
 #     return dataset
 
 
-def read_datsets(input_file):
+def read_datsets(input_file, perform_multiclass=False):
     if input_file.endswith('.json'):
+        # we're not using json anymore. We should deprecate this
         dataset = load_json_dataset(input_file)
+
     elif input_file.endswith('.converted.txt'):
         dataset = load_myds(input_file)
     else:
-        dataset = load_dataset(input_file)
+        if perform_multiclass:
+            dataset = load_dataset(input_file, "multilabel")
+        else:
+            dataset = load_dataset(input_file)
     return dataset
 
 
@@ -125,7 +130,7 @@ def main(arguments):
     # param = parse_parameters() # get parameters from command
     display_params(arguments)
 
-    datasets = [read_datsets(x) for x in arguments['input']] # loading datasets as lists of document objects
+    datasets = [read_datsets(x, arguments['multi']) for x in arguments['input']] # loading datasets as lists of document objects
     features_list = [x for x in ['tfidf', 'char_grams', 'lexical', 'style', 'readability', 'nela'] if arguments[x]]
 
     maxabs_scaler = MaxAbsScaler()
@@ -167,6 +172,9 @@ if __name__ == '__main__':
     parser.add_argument("-n", "--nela", action="store_true", default=False,
                         help="compute Nela features")
 
+    parser.add_argument("-m", "-multi", action="store_true", default=False,
+                        help="perform multi-class classification")
+
     arguments = parser.parse_args()
 
     param = OrderedDict()
@@ -177,5 +185,6 @@ if __name__ == '__main__':
     param['style'] = arguments.style
     param['readability'] = arguments.readability
     param['nela'] = arguments.nela
+    param['multi'] = arguments.multi
 
     main(param)

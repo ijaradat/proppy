@@ -78,7 +78,7 @@ def load_myds(dataset_file):
     return dataset
 
 
-def load_dataset(dataset_file, classification):
+def load_dataset(dataset_file, classification="binary"):
     print ('loading dataset: '+dataset_file+ ' ...')
     dataset =[]
     with codecs.open(dataset_file,'r') as f:
@@ -147,7 +147,7 @@ def construct_pipeline(ds, feats, param):
         feature_set.append( ('readability', readability_features))
     if param['nela'] == True:
         nela_features = feats.extract_nela_features(ds)
-        feature_set.appen(('nela', nela_features))
+        feature_set.append(('nela', nela_features))
 
 
     # feature union is used from the sklearn pipeline class to concatenate features
