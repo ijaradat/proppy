@@ -172,7 +172,7 @@ if __name__ == '__main__':
     parser.add_argument("-n", "--nela", action="store_true", default=False,
                         help="compute Nela features")
 
-    parser.add_argument("-m", "-multi", action="store_true", default=False,
+    parser.add_argument("-m", "--multi", action="store_true", default=False,
                         help="perform multi-class classification")
 
     arguments = parser.parse_args()

@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 # coding: utf-8
 
-import codecs
+import logging
 from setup import *
 from features import *
 from sklearn.metrics import precision_score, recall_score
@@ -14,7 +14,6 @@ def parse_parameters(opts):
     param['train'] = opts.train
     param['sources'] = opts.sources
     param['new'] = opts.new
-    param['pred'] = opts.pred
     param['fix']=opts.fix
     param['baseline'] = opts.baseline
     param['char_grams'] = opts.char_grams
@@ -23,18 +22,18 @@ def parse_parameters(opts):
     param['readability'] = opts.readability
     param['nela'] = opts.nela
 
-    print ("PARAMETER LIST:_______________________________________________________________________")
-    print (param)
+    logging.info ("PARAMETER LIST:_______________________________________________________________________")
+    logging.info (param)
 
     return param
 
 
 def read_new_datsets(param):
-    print ('reading datasets ...')
+    logging.info ('reading datasets ...')
     train = load_myds(param['new'])
     dev = load_myds(param['dev'])
     test = load_myds(param['test'])
-    print ('done reading data !')
+    logging.info ('done reading data !')
     return train,dev,test
 
 def get_all_articles_from_sources(sources,ds_lines):
@@ -87,8 +86,8 @@ def create_dataset(ds_file,sources,random_sources,new_ds_file,fix_number):
                     out.write(line+'\n')
                     articles_from_random_count+=1
                     if articles_from_random_count == 9*articles_from_sources_count:
-                        print ("number of articles from selected sources is: "+ str(articles_from_sources_count))
-                        print ("number of articles from random sources is :"+str(articles_from_random_count))
+                        logging.info ("number of articles from selected sources is: "+ str(articles_from_sources_count))
+                        logging.info ("number of articles from random sources is :"+str(articles_from_random_count))
                         f.close()
                         out.close()
                         break
@@ -118,27 +117,27 @@ def list_sources_in_ds(ds_file):
                     nonprop_sources[fields[-2]] += 1
                 else:
                     nonprop_sources[fields[-2]] = 1
-    print("Propagandistic sources statistics:______________________________________________________")
-    print(prop_sources)
-    print('TOTAL = '+str(len(prop_sources)))
-    print("Non propagandistic sources statistics:__________________________________________________")
-    print(nonprop_sources)
-    print('TOTAL = ' + str(len(nonprop_sources)))
-    print("Non Propagandistic articles statistics:______________________________________________________")
-    print('TOTAL = '+str(nonprop_articles))
-    print("Propagandistic articles statistics:__________________________________________________")
-    print('TOTAL = ' + str(prop_articles))
+    logging.info("Propagandistic sources statistics:______________________________________________________")
+    logging.info(prop_sources)
+    logging.info('TOTAL = '+str(len(prop_sources)))
+    logging.info("Non propagandistic sources statistics:__________________________________________________")
+    logging.info(nonprop_sources)
+    logging.info('TOTAL = ' + str(len(nonprop_sources)))
+    logging.info("Non Propagandistic articles statistics:______________________________________________________")
+    logging.info('TOTAL = '+str(nonprop_articles))
+    logging.info("Propagandistic articles statistics:__________________________________________________")
+    logging.info('TOTAL = ' + str(prop_articles))
     return prop_sources,nonprop_sources
 
 def print_scores(f_score, accuracy, precision, recall):
-    print ("F1 score:")
-    print (f_score)
-    print ("Accuarcy :")
-    print (accuracy)
-    print ("Precision :")
-    print (precision)
-    print ('Recall :')
-    print (recall)
+    logging.info ("F1 score:")
+    logging.info (f_score)
+    logging.info ("Accuarcy :")
+    logging.info (accuracy)
+    logging.info ("Precision :")
+    logging.info (precision)
+    logging.info ('Recall :')
+    logging.info (recall)
 
 def custom_evaluate(ds,source_list):
     print('████████████████  CUSTOM EVALUATION  ████████████████')
@@ -168,35 +167,35 @@ def custom_evaluate(ds,source_list):
     all_pos_gold = [doc.gold_label for doc in all_positive_instances]
     all_neg_pred = [doc.prediction for doc in all_negative_instances]
     all_neg_gold = [doc.gold_label for doc in all_negative_instances]
-    print ('Evaluation on all instances:')
+    logging.info ('Evaluation on all instances:')
     f_score = f1_score(y_true, y_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(y_true, y_pred)
     precision = precision_score(y_true, y_pred, pos_label='1')
     recall = recall_score(y_true, y_pred, pos_label='1')
     print_scores(f_score,accuracy, precision, recall)
 
-    print ('Evaluation on in-source positive instances only: ')
+    logging.info ('Evaluation on in-source positive instances only: ')
     f_score = f1_score(insource_pos_gold, insource_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(insource_pos_gold, insource_pos_pred)
     precision = precision_score(insource_pos_gold, insource_pos_pred, pos_label='1')
     recall= recall_score(insource_pos_gold, insource_pos_pred, pos_label='1')
     print_scores(f_score, accuracy, precision, recall)
 
-    print ('Evaluation on out-source positive instances only:')
+    logging.info ('Evaluation on out-source positive instances only:')
     f_score = f1_score(outsource_pos_gold, outsource_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(outsource_pos_gold, outsource_pos_pred)
     precision = precision_score(outsource_pos_gold, outsource_pos_pred, pos_label='1')
     recall = recall_score(outsource_pos_gold, outsource_pos_pred, pos_label='1')
     print_scores(f_score, accuracy, precision, recall)
 
-    print ('Evaluation on all positive instances only:')
+    logging.info ('Evaluation on all positive instances only:')
     f_score = f1_score(all_pos_gold, all_pos_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(all_pos_gold, all_pos_pred)
     precision = precision_score(all_pos_gold, all_pos_pred, pos_label='1')
     recall = recall_score(all_pos_gold, all_pos_pred, pos_label='1')
     print_scores(f_score, accuracy, precision, recall)
 
-    print ('Evaluation on all negative instances only:')
+    logging.info ('Evaluation on all negative instances only:')
     f_score = f1_score(all_neg_gold, all_neg_pred, pos_label='1')  # calculating F1 score
     accuracy = accuracy_score(all_neg_gold, all_neg_pred)
     precision = precision_score(all_neg_gold,all_neg_pred, pos_label='1')
@@ -205,29 +204,31 @@ def custom_evaluate(ds,source_list):
 
 def main(opts):
     #list_sources_in_ds('../data/test.dist.converted.txt')
+    now= datetime.datetime.now().strftime("%I:%M:%S on %p-%B-%d-%Y")
+    logging.info("experiment started at "+now)
     param = parse_parameters(opts)  # get parameters from command
     selected_sources = param['sources'].split(',')
     prop_sources,nonprop_sources = list_sources_in_ds(param['train'])
     random_sources = nonprop_sources.keys()
 
     create_dataset(param['train'],selected_sources,random_sources,param['new'],param['fix'])
-    print('a new training dataset created at :'+ param['new'])
+    logging.info('a new training dataset created at :'+ param['new'])
 
     new_train, dev, test = read_new_datsets(param)  # loading datsets as lists of document objects
     feats = features(new_train)  # creating an object from the class features to initialize important global variables such as lexicons and training ds
 
     train_pipeline = construct_pipeline(new_train, feats, param)
-    train_model(new_train, train_pipeline)  # training the model
-
+    model_file =train_model(new_train, train_pipeline)  # training the model
+    logging.info('Training finished ')
     dev_pipeline = construct_pipeline(dev, feats, param)
-    tested_dev = test_model(dev, 'dev', dev_pipeline,param['pred'])  # testing the model with the dev ds
+    tested_dev = test_model(dev, 'dev', dev_pipeline,model_file)  # testing the model with the dev ds
 
     test_pipeline = construct_pipeline(test, feats, param)
-    tested_test = test_model(test, 'test', test_pipeline,param['pred'])
+    tested_test = test_model(test, 'test', test_pipeline,model_file)
 
-    print ('evaluating the model on dev ds ...')
+    logging.info ('evaluating the model on dev ds ...')
     custom_evaluate(tested_dev,selected_sources)
-    print ('evaluating the model on test ds ...')
+    logging.info ('evaluating the model on test ds ...')
     custom_evaluate(tested_test,selected_sources)
 
 if __name__ == '__main__':
@@ -258,19 +259,16 @@ if __name__ == '__main__':
         "-n", "--new", default="../data/new_train.txt",
         help="full path where the new train ds will be saved"
     )
-    optparser.add_option(
-        "-p", "--pred", default="../data/predictions",
-        help="full path where the predictions file will be saved: e.g:../data/predictions "
-    )
+
     optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =True,
                         help="compute tdidf word-n-grams features")
-    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= False,
+    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= True,
                         help="compute char n-grams features")
-    optparser.add_option("-L", "--lexical", action="store_true", default=False,
+    optparser.add_option("-L", "--lexical", action="store_true", default=True,
                         help="compute lexical features")
-    optparser.add_option("-S", "--style", action="store_true", default=False,
+    optparser.add_option("-S", "--style", action="store_true", default=True,
                         help="compute lexical style features")
-    optparser.add_option("-R", "--readability", action="store_true", default=False,
+    optparser.add_option("-R", "--readability", action="store_true", default=True,
                         help="compute readability features")
     optparser.add_option("-N", "--nela", action="store_true", default=False,
                         help="compute Nela features")
