@@ -200,6 +200,7 @@ class LexicalStyle_vectorizer(TransformerMixin):
 
     def transform(self, X):
         # COMPUTE THE FEATURES
+        print('Computing lexical style features...')
         counts = []
         for doc in X:
             # on row; in my case a matrix [5x16000]
