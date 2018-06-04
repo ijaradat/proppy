@@ -16,9 +16,13 @@ FORMAT = "%(asctime)-15s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
 
-def get_output_file_name(features_file):
-    return features_file.replace(".features.pickle", ".mdl")
+def get_output_file_name(features_file, multi=False):
+    if multi:
+        return features_file.replace(".features.pickle", ".mdl")
+    else:
+        return features_file.replace(".features.pickle", ".binary.mdl")
 
+    
 def get_gold_labels(input_file, perform_multiclass=False):
     dataset = read_datsets(input_file, perform_multiclass)  # loading dataset as lists of document objects
     Y = [doc.gold_label for doc in dataset]
@@ -43,7 +47,7 @@ def main(arguments):
 
     model = train_model(X, Y)
 
-    output_file = get_output_file_name(arguments['features'])
+    output_file = get_output_file_name(arguments['features'], param['multi'])
     joblib.dump(model, output_file)  # dump the model
     logging.info("model dumped to %s", output_file)
 
