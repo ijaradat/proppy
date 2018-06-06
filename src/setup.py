@@ -211,7 +211,7 @@ def test_model(ds, ds_name, features_pipeline, model_file):
     #max_vals = np.amax(X, axis=0)
     #print (max_vals)
     #print (max_vals[np.argsort(max_vals)[-10:]])
-    pickle.dump(X, open("test_features.pickle", "wb"))  # dump it (to speed up exp.)
+    #pickle.dump(X, open("test_features.pickle", "wb"))  # dump it (to speed up exp.)
     #X = pickle.load('test_features.pickle')
     logging.info ('predicting Y for each given X in test ...')
     Y_ = model.predict(X)  # predicting the labels in this ds via the trained model loaded in the variable 'model'
@@ -291,17 +291,17 @@ if __name__ == '__main__':
         "-t", "--test", default="../data/sample.txt",  # "xtest.txt.filtered.txt"
         help="test set path"
     )
-    optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =True,
+    optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =False,
                         help="compute tdidf word-n-grams features")
     optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= False,
                         help="compute char n-grams features")
     optparser.add_option("-L", "--lexical", action="store_true", default=False,
                         help="compute lexical features")
-    optparser.add_option("-S", "--style", action="store_true", default=True,
+    optparser.add_option("-S", "--style", action="store_true", default=False,
                         help="compute lexical style features")
     optparser.add_option("-R", "--readability", action="store_true", default=False,
                         help="compute readability features")
-    optparser.add_option("-N", "--nela", action="store_true", default=False,
+    optparser.add_option("-N", "--nela", action="store_true", default=True,
                         help="compute Nela features")
 
     opts = optparser.parse_args()[0]
