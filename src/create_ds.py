@@ -203,7 +203,7 @@ def custom_evaluate(ds,source_list):
     print_scores(f_score, accuracy, precision, recall)
 
 def main(opts):
-    #list_sources_in_ds('../data/test.dist.converted.txt')
+    list_sources_in_ds('../data/train.dist.converted.txt')
     now= datetime.datetime.now().strftime("%I:%M:%S on %p-%B-%d-%Y")
     logging.info("experiment started at "+now)
     param = parse_parameters(opts)  # get parameters from command
@@ -262,13 +262,13 @@ if __name__ == '__main__':
 
     optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =True,
                         help="compute tdidf word-n-grams features")
-    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= True,
+    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= False,
                         help="compute char n-grams features")
-    optparser.add_option("-L", "--lexical", action="store_true", default=True,
+    optparser.add_option("-L", "--lexical", action="store_true", default=False,
                         help="compute lexical features")
-    optparser.add_option("-S", "--style", action="store_true", default=True,
+    optparser.add_option("-S", "--style", action="store_true", default=False,
                         help="compute lexical style features")
-    optparser.add_option("-R", "--readability", action="store_true", default=True,
+    optparser.add_option("-R", "--readability", action="store_true", default=False,
                         help="compute readability features")
     optparser.add_option("-N", "--nela", action="store_true", default=False,
                         help="compute Nela features")
