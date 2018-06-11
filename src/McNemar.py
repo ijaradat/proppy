@@ -2,42 +2,21 @@
 
 import sys
 import codecs
-
-def read_files2():
-    if len(sys.argv) < 4:
-        print "Usage: " + sys.argv[0] + " scores1 scores2 labels"
-        sys.exit(1)
-
-    fscoresone = open(sys.argv[1],"r")
-    scoresone = [ float(x.rstrip()) for x in fscoresone.readlines() ]
-    fscoresone.close()
-
-    fscorestwo = open(sys.argv[2],"r")
-    scorestwo = [ float(x.rstrip()) for x in fscorestwo.readlines() ]
-    fscorestwo.close()
-
-    flabels = open(sys.argv[3],"r")
-    labels = [ float(x.rstrip()) for x in flabels.readlines() ]
-    flabels.close()
-
-
-    McNemar(scoresone,scorestwo, labels)
-
-
-
-
-def McNemar(scoresone, scorestwo, labels, output):
+  
+def McNemar(scoresone, scorestwo, labels, output, binary=True):
     with codecs.open(output, 'w', encoding='utf8') as out:
         muz, mzu = 0, 0
         for (a,b,l) in zip(scoresone, scorestwo, labels):
-            if (a*l > 0) and (b*l < 0 or (l<0 and b*l==0)):
-                print "m10: ", a,b,l,muz
-                out.write("m10: "+'\t'+ str(a)+'\t'+str(b) +'\t'+str(l)+ '\t'+str(muz)+'\n')
+            #first predictor is correct, second predictor makes a mistake
+            if (a == l) and (b != l):
+                #print "m10: ", a,b,l,muz
+                #out.write("m10: "+'\t'+ str(a)+'\t'+str(b) +'\t'+str(l)+ '\t'+str(muz)+'\n')
                 muz += 1
-            if (b*l > 0) and (a*l < 0 or (l<0 and a*l==0)):
+            #second predictor is correct, first predictor makes a mistake
+            if (a != l) and (b == l):
                 mzu += 1
-                print "m01: ", a,b,l,mzu
-                out.write("m01: "+'\t'+ str(a)+ '\t'+ str(b)+'\t'+ str(l)+'\t'+str(mzu)+'\n')
+                #print "m01: ", a,b,l,mzu
+                #out.write("m01: "+'\t'+ str(a)+ '\t'+ str(b)+'\t'+ str(l)+'\t'+str(mzu)+'\n')
         print muz+mzu
         out.write(str(muz + mzu) + '\n')
         if mzu+mzu != 0:
@@ -71,7 +50,28 @@ def read_files (predictions_file1, predictions_file2, direct):
             file1_name = predictions_file1.replace(direct,'')
             file2_name = predictions_file2.replace(direct,'')
             out= direct+'McNemar/'+file1_name+'VS'+file2_name
-            McNemar(scoresone, scorestwo, labels, out)
+
+            label_list = [ int(x) for x in list(set(labels)) ]
+            if len(label_list)<2:
+                sys.exit("ERROR: only one target label found %s"%(label_list[0]))
+            if len(label_list)==2:
+                binary = True
+                if not sum([x-y for x,y in zip(sorted(label_list), [-1, 1])]) == 0:
+                    sys.exit("ERROR: in a binary problem the labels are supposed to be -1, 1. Found instead %s"%(",".join(label_list)))
+        
+                scoresone = [ -1 if x<0 else 1 for x in scoresone ]
+                scorestwo = [ -1 if x<0 else 1 for x in scorestwo ]
+
+            else:
+                binary = False
+                print "multiclass problem with the following labels %s"%(",".join([ str(x) for x in label_list]))
+                scoresone = [ int(x) for x in scoresone ]
+                scorestwo = [ int(x) for x in scorestwo ]
+                if len(set(scoresone)) > len(label_list) or len(set(scorestwo)) > len(label_list):
+                    sys.exit("ERROR: found more different labels in one of the prediction files (%d, %d) than in the target label file (%d)"
+                             %(len(set(scoresone)), len(set(scorestwo)), len(label_list)))
+            
+            McNemar(scoresone, scorestwo, labels, out, binary)
 
 
 
@@ -82,4 +82,9 @@ readability = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt
 style = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.style.pred'
 tfidf = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.tfidf.pred'
 
-read_files(style, tfidf, '../data/predictions.multi/test/')
+#style = "/home/gmartino/McNemar/pred-multi/test.txtconverted.txt.filtered.txt.style.pred"
+#tfidf = "/home/gmartino/McNemar/pred-multi/test.txtconverted.txt.filtered.txt.tfidf.pred"
+#style = "/home/gmartino/McNemar/pred-binary/test.txtconverted.txt.filtered.txt.style.pred"
+#tfidf = "/home/gmartino/McNemar/pred-binary/test.txtconverted.txt.filtered.txt.tfidf.pred"
+
+read_files(style, tfidf, '/home/gmartino/McNemar/pred-binary/') 
