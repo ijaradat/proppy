@@ -39,10 +39,12 @@ def McNemar(scoresone, scorestwo, labels, output):
                 print "m01: ", a,b,l,mzu
                 out.write("m01: "+'\t'+ str(a)+ '\t'+ str(b)+'\t'+ str(l)+'\t'+str(mzu)+'\n')
         print muz+mzu
-        out.write(str(muz+mzu)+'\n')
-        print ((abs(muz-mzu)-1)**2)/(muz+mzu)
-        out.write( str(((abs(muz-mzu)-1)**2)/(muz+mzu)))
-
+        out.write(str(muz + mzu) + '\n')
+        if mzu+mzu != 0:
+            print ((abs(muz-mzu)-1)**2)/(muz+mzu)
+            out.write( str(((abs(muz-mzu)-1)**2)/(muz+mzu)))
+        else:
+            out.write ('cannot divide by zero')
 #pag. 227 per confrontare i valori
 
 
@@ -73,11 +75,11 @@ def read_files (predictions_file1, predictions_file2, direct):
 
 
 
-char_grams = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.char_grams.pred'
-lexical = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.lexical.pred'
-nela = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.nela.pred'
-readability = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.readability.pred'
-style = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.style.pred'
-tfidf = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.tfidf.pred'
+char_grams = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.char_grams.pred'
+lexical = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.lexical.pred'
+nela = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.nela.pred'
+readability = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.readability.pred'
+style = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.style.pred'
+tfidf = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.tfidf.pred'
 
-read_files(char_grams, tfidf, '../data/predictions.bin/test/')
+read_files(style, tfidf, '../data/predictions.multi/test/')
