@@ -1,6 +1,7 @@
 import codecs
 import json
-
+from nltk.tokenize import word_tokenize
+from math import sqrt
 def replace_separator(data_file):
     with codecs.open(data_file, 'r') as f:
         with codecs.open(data_file+'-fixed.txt', 'w') as out:
@@ -115,7 +116,7 @@ def from_josn_to_tsv(file):
                       a['html_authors']+'\t'+a['html_title']+'\t'+
                       a['mbfc_class']+'\t'+a['mbfc_link']+'\t'+a['mbfc_name']+'\t'+ a['mbfc_notes']+'\t'+a['mbfc_score']+'\t'+a['mbfc_url']+'\t'+a['propaganda_label']+'\n')
 
-def rashkan_statistics(ds_file):
+def rashkan_remove_bad_examples(ds_file):
     with codecs.open(ds_file+'.filtered.txt','w', encoding='utf8') as out:
         with codecs.open(ds_file, 'r', encoding='utf8') as f:
             count=0
@@ -200,12 +201,83 @@ def distribute_sources(train_file,dev_file,test_file):
                             for a in test_articles:
                                 test_out.write(a+'\n')
                             test_out.close()
+def mean(lst):
+    return sum(lst) / len(lst)
+
+def stddev(lst):
+
+    mn = mean(lst)
+    variance = sum([(e-mn)**2 for e in lst]) / len(lst)
+    return sqrt(variance)
+
+
+def average_length_and_std(ds):
+    lengths =[]
+    for article in ds:
+        tokens = word_tokenize(article)
+        lengths.append(len(tokens))
+    average_length = mean(lengths)
+    std = stddev(lengths)
+    return average_length,std
+
+
+def provide_statistics(ds_files):
+    hoax=[]
+    satire=[]
+    propaganda =[]
+    trusted =[]
+
+    for ds_file in ds_files:
+        count_hoax = 0
+        count_satire = 0
+        count_propaganda = 0
+        count_trusted = 0
+        with codecs.open(ds_file, 'r', encoding='utf8') as f:
+            lines = f.readlines()
+            print ('total number of articles  = '+str(len(lines)))
+            for line in lines:
+                line=line.strip()
+                fields = line.split('\t')
+                if fields[0] =='1':
+                    satire.append(fields[-1])
+                    count_satire+=1
+                elif fields[0] =='2':
+                    hoax.append(fields[-1])
+                    count_hoax+=1
+                elif fields[0] =='3':
+                    propaganda.append(fields[-1])
+                    count_propaganda+=1
+                elif fields[0] == '4':
+                    trusted.append(fields[-1])
+                    count_trusted+=1
+
+        print ('ds: '+ ds_file)
+        print ("articles count  - Satire = " + str(count_satire))
+        print ("articles count  - Hoax = " + str(count_hoax))
+        print ("articles count  - Propaganda = " + str(count_propaganda))
+        print ("articles count  - Trusted = " + str(count_trusted))
+        print ('-----------------------------------------------------------')
+
+    hoax_avg_length,hoax_std = average_length_and_std(hoax)
+    satire_avg_length,satire_std =  average_length_and_std(satire)
+    propaganda_avg_length, prop_std=average_length_and_std(propaganda)
+    trusted_avg_length,trusted_std= average_length_and_std(trusted)
+    print ("Average lengths - Satire = "+ str(satire_avg_length))
+    print ("Average lengths - Hoax = " + str(hoax_avg_length))
+    print ("Average lengths - Propaganda = " + str(propaganda_avg_length))
+    print ("Average lengths - Trusted = " + str(trusted_avg_length))
+    print ('-----------------------------------------------------------')
+    print ("StD - Satire = "+ str(satire_std))
+    print ("StD - Hoax = " + str(hoax_std))
+    print ("StD - Propaganda = " + str(prop_std))
+    print ("StD - Trusted = " + str(trusted_std))
 
 
 
 
 
-distribute_sources('../data/train.json.converted.txt','../data/dev.json.converted.txt','../data/test.json.converted.txt')
+provide_statistics(['../data/original/xtrain.txt','../data/original/xdev.txt'])
+#distribute_sources('../data/train.json.converted.txt','../data/dev.json.converted.txt','../data/test.json.converted.txt')
 #remove_redundants('../data/train.json.converted.txt')
 #rashkan_statistics('../data/test.txtconverted.txt')
 #from_josn_to_tsv('../data/test.json')

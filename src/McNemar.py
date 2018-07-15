@@ -75,16 +75,16 @@ def read_files (predictions_file1, predictions_file2, direct):
 
 
 
-char_grams = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.char_grams.pred'
-lexical = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.lexical.pred'
-nela = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.nela.pred'
-readability = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.readability.pred'
-style = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.style.pred'
-tfidf = '../data/predictions.multi/test/test.txtconverted.txt.filtered.txt.tfidf.pred'
+char_grams = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.char_grams.pred'
+lexical = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.lexical.pred'
+nela = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.nela.pred'
+readability = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.readability.pred'
+style = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.style.pred'
+tfidf = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.tfidf.pred'
 
 #style = "/home/gmartino/McNemar/pred-multi/test.txtconverted.txt.filtered.txt.style.pred"
 #tfidf = "/home/gmartino/McNemar/pred-multi/test.txtconverted.txt.filtered.txt.tfidf.pred"
 #style = "/home/gmartino/McNemar/pred-binary/test.txtconverted.txt.filtered.txt.style.pred"
 #tfidf = "/home/gmartino/McNemar/pred-binary/test.txtconverted.txt.filtered.txt.tfidf.pred"
 
-read_files(style, tfidf, '/home/gmartino/McNemar/pred-binary/') 
+read_files(style, tfidf, '../data/predictions.bin/test/')

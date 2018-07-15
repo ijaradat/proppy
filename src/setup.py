@@ -175,6 +175,7 @@ def train_model(train, features_pipeline):
     model = LogisticRegression(penalty='l2', class_weight='balanced') # creating an object from the max entropy with L2 regulariation
     logging.info("Computing features")
     X = features_pipeline.transform([doc.text for doc in train]) # calling transform method of each transformer in the features pipeline to transform data into vectors of features
+    pickle.dump(X, open("transformed_train.pickle", "wb"))
     X = maxabs_scaler.fit_transform(X)
     #print ('maximum absolute values :')
     max_vals = np.amax(X, axis=0) # get the max absolute value of each feature from all data examples
@@ -280,28 +281,28 @@ if __name__ == '__main__':
         help="experiment type : 'multilabel' or  'binary' classification. i.e prop vs others or 4 classes"
     )
     optparser.add_option(
-        "-T", "--xtrain", default="../data/sample.txt",  # "xtrain.txt.filtered.txt"
+        "-T", "--xtrain", default="../data/train.dist.converted.txt",  # "xtrain.txt.filtered.txt"
         help="xtrain set path"
     )
     optparser.add_option(
-        "-D", "--xdev", default="../data/sample.txt",  # "xdev.txt.filtered.txt"
+        "-D", "--xdev", default="../data/dev.dist.converted.txt",  # "xdev.txt.filtered.txt"
         help="xdev set path"
     )
     optparser.add_option(
-        "-t", "--test", default="../data/sample.txt",  # "xtest.txt.filtered.txt"
+        "-t", "--test", default="../data/test.dist.converted.txt",  # "xtest.txt.filtered.txt"
         help="test set path"
     )
-    optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =False,
+    optparser.add_option("-B", "--baseline", dest='baseline', action="store_true", default =True,
                         help="compute tdidf word-n-grams features")
-    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= False,
+    optparser.add_option("-C", "--chargrams", dest="char_grams", action="store_true", default= True,
                         help="compute char n-grams features")
-    optparser.add_option("-L", "--lexical", action="store_true", default=False,
+    optparser.add_option("-L", "--lexical", action="store_true", default=True,
                         help="compute lexical features")
-    optparser.add_option("-S", "--style", action="store_true", default=False,
+    optparser.add_option("-S", "--style", action="store_true", default=True,
                         help="compute lexical style features")
-    optparser.add_option("-R", "--readability", action="store_true", default=False,
+    optparser.add_option("-R", "--readability", action="store_true", default=True,
                         help="compute readability features")
-    optparser.add_option("-N", "--nela", action="store_true", default=True,
+    optparser.add_option("-N", "--nela", action="store_true", default=False,
                         help="compute Nela features")
 
     opts = optparser.parse_args()[0]
