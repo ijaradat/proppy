@@ -4,7 +4,7 @@ import glob
 
 
 #opens all files in a specific folder and collects results
-def get_results(directory = '../results/source-tfidf/*.out'):
+def get_results(directory = '../results/slurms_notfidf_1/*.out'):
     for f in glob.glob(directory):
         with codecs.open(f+'-easy.tsv','w', encoding='utf8') as out:
             with codecs.open(f,'r', encoding='utf8') as log:
@@ -31,7 +31,15 @@ def get_results(directory = '../results/source-tfidf/*.out'):
                     scores_string +=score+'\t'
                 out.write("done\tT\tF\tF\tF\tF\tF\t"+sources[0]+'\t'+sources[1]+'\t'+sources[2]+'\t'+scores_string+'\n')
 
-
+def collect_from_files(directory = '../results/slurms_notfidf_1/*.tsv'):
+    with codecs.open('combined.tsv', 'w', encoding='utf8') as out:
+        for f in glob.glob(directory):
+            with codecs.open(f , 'r', encoding='utf8') as log:
+                lines = log.readlines()
+                for line in lines:
+                    out.write(line)
+                log.close()
+        out.close()
 
 
 
@@ -42,3 +50,4 @@ def get_results(directory = '../results/source-tfidf/*.out'):
 
 
 get_results()
+collect_from_files()

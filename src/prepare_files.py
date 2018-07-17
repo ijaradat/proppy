@@ -221,7 +221,7 @@ def average_length_and_std(ds):
     return average_length,std
 
 
-def provide_statistics(ds_files):
+def provide_statistics_rashkin(ds_files):
     hoax=[]
     satire=[]
     propaganda =[]
@@ -272,11 +272,43 @@ def provide_statistics(ds_files):
     print ("StD - Propaganda = " + str(prop_std))
     print ("StD - Trusted = " + str(trusted_std))
 
+def provide_statistics_newCorpus(ds_files):
+    propaganda =[]
+    trusted =[]
+
+    for ds_file in ds_files:
+        count_propaganda = 0
+        count_trusted = 0
+        with codecs.open(ds_file, 'r', encoding='utf8') as f:
+            lines = f.readlines()
+            print ('total number of articles  = '+str(len(lines)))
+            for line in lines:
+                line=line.strip()
+                fields = line.split('\t')
+                if fields[-1] =='-1':
+                    trusted.append(fields[0])
+                    count_trusted+=1
+                elif fields[-1] =='1':
+                    propaganda.append(fields[0])
+                    count_propaganda+=1
+
+        print ('ds: '+ ds_file)
+        print ("articles count  - Propaganda = " + str(count_propaganda))
+        print ("articles count  - Trusted = " + str(count_trusted))
+        print ('-----------------------------------------------------------')
+
+
+    propaganda_avg_length, prop_std=average_length_and_std(propaganda)
+    trusted_avg_length,trusted_std= average_length_and_std(trusted)
+    print ("Average lengths - Propaganda = " + str(propaganda_avg_length))
+    print ("Average lengths - Trusted = " + str(trusted_avg_length))
+    print ('-----------------------------------------------------------')
+    print ("StD - Propaganda = " + str(prop_std))
+    print ("StD - Trusted = " + str(trusted_std))
 
 
 
-
-provide_statistics(['../data/original/xtrain.txt','../data/original/xdev.txt'])
+provide_statistics_newCorpus(['../data/train.dist.converted.txt','../data/dev.dist.converted.txt', '../data/test.dist.converted.txt'])
 #distribute_sources('../data/train.json.converted.txt','../data/dev.json.converted.txt','../data/test.json.converted.txt')
 #remove_redundants('../data/train.json.converted.txt')
 #rashkan_statistics('../data/test.txtconverted.txt')
