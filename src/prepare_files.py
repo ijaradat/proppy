@@ -308,7 +308,61 @@ def provide_statistics_newCorpus(ds_files):
 
 
 
-provide_statistics_newCorpus(['../data/train.dist.converted.txt','../data/dev.dist.converted.txt', '../data/test.dist.converted.txt'])
+def load_sources(sources_file):
+    sources =[]
+    with codecs.open(sources_file, 'r', encoding='utf8') as f:
+        lines= f.readlines()
+        for line in lines:
+            line= line.strip()
+            sources.append(line)
+        f.close()
+    return sources
+
+
+def bias_statistics(ds_file):
+    left_biased = load_sources('../data/sources/gdelt-matches-left-min.txt')
+    right_biased = load_sources('../data/sources/gdelt-matches-right-min.txt')
+    least_biased = load_sources('../data/sources/gdelt-matches-least-biased-min.txt')
+    left_c_biased =load_sources('../data/sources/gdelt-matches-left-center-min.txt')
+    right_c_biased = load_sources('../data/sources/gdelt-matches-right-center-min.txt')
+    left_biased_used = []
+    right_biased_used = []
+    left_c_biased_used = []
+    right_c_biased_used = []
+    least_biased_used = []
+    with codecs.open(ds_file, 'r', encoding='utf8') as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.strip()
+            fields = line.split('\t')
+            if fields[-2] in left_biased:
+                if fields[-2] not in left_biased_used:
+                    left_biased_used.append(fields[-2])
+            elif fields[-2] in left_c_biased:
+                if fields[-2] not in left_c_biased_used:
+                    left_c_biased_used.append(fields[-2])
+            elif fields[-2] in right_c_biased:
+                if fields[-2] not in right_c_biased_used:
+                    right_c_biased_used.append(fields[-2])
+            elif fields[-2] in right_biased:
+                if fields[-2] not in right_biased_used:
+                    right_biased_used.append(fields[-2])
+            elif fields[-2] in least_biased:
+                if fields[-2] not in least_biased_used:
+                    least_biased_used.append(fields[-2])
+
+        print 'number of sources in ds :'+ ds_file+ '= '
+        print 'least- biased sources = '+ str(len(least_biased_used))
+        print 'left- biased sources = ' + str(len(left_biased_used))
+        print 'right- biased sources = ' + str(len(right_biased_used))
+        print 'left-center - biased sources = ' + str(len(left_c_biased_used))
+        print 'right- center- biased sources = ' + str(len(right_c_biased_used))
+
+
+bias_statistics('../data/train.dist.converted.txt')
+bias_statistics('../data/dev.dist.converted.txt')
+bias_statistics('../data/test.dist.converted.txt')
+#provide_statistics_newCorpus(['../data/train.dist.converted.txt','../data/dev.dist.converted.txt', '../data/test.dist.converted.txt'])
 #distribute_sources('../data/train.json.converted.txt','../data/dev.json.converted.txt','../data/test.json.converted.txt')
 #remove_redundants('../data/train.json.converted.txt')
 #rashkan_statistics('../data/test.txtconverted.txt')
