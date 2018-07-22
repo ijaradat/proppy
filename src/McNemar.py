@@ -81,10 +81,8 @@ nela = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.nela.pre
 readability = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.readability.pred'
 style = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.style.pred'
 tfidf = '../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.tfidf.pred'
+style_lex_nela_char='../data/predictions.bin/test/test.txtconverted.txt.filtered.txt.char_grams.lexical.style.nela.pred'
 
-#style = "/home/gmartino/McNemar/pred-multi/test.txtconverted.txt.filtered.txt.style.pred"
-#tfidf = "/home/gmartino/McNemar/pred-multi/test.txtconverted.txt.filtered.txt.tfidf.pred"
-#style = "/home/gmartino/McNemar/pred-binary/test.txtconverted.txt.filtered.txt.style.pred"
-#tfidf = "/home/gmartino/McNemar/pred-binary/test.txtconverted.txt.filtered.txt.tfidf.pred"
-
-read_files(style, tfidf, '../data/predictions.bin/test/')
+style_lex_nela_char_QP = '../data/predictions_qp/test/test.dist.converted.txt.char_grams.lexical.style.nela.pred'
+tfidf_QP = '../data/predictions_qp/test/test.dist.converted.txt.tfidf.pred'
+read_files(style_lex_nela_char_QP, tfidf_QP, '../data/predictions_qp/test/')

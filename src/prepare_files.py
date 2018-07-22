@@ -226,7 +226,7 @@ def provide_statistics_rashkin(ds_files):
     satire=[]
     propaganda =[]
     trusted =[]
-
+    all =[]
     for ds_file in ds_files:
         count_hoax = 0
         count_satire = 0
@@ -238,6 +238,7 @@ def provide_statistics_rashkin(ds_files):
             for line in lines:
                 line=line.strip()
                 fields = line.split('\t')
+                all.append(fields[-1])
                 if fields[0] =='1':
                     satire.append(fields[-1])
                     count_satire+=1
@@ -262,20 +263,23 @@ def provide_statistics_rashkin(ds_files):
     satire_avg_length,satire_std =  average_length_and_std(satire)
     propaganda_avg_length, prop_std=average_length_and_std(propaganda)
     trusted_avg_length,trusted_std= average_length_and_std(trusted)
+    all_avg_length, all_std = average_length_and_std(all)
     print ("Average lengths - Satire = "+ str(satire_avg_length))
     print ("Average lengths - Hoax = " + str(hoax_avg_length))
     print ("Average lengths - Propaganda = " + str(propaganda_avg_length))
     print ("Average lengths - Trusted = " + str(trusted_avg_length))
+    print ("Average lengths - ALL = " + str(all_avg_length))
     print ('-----------------------------------------------------------')
     print ("StD - Satire = "+ str(satire_std))
     print ("StD - Hoax = " + str(hoax_std))
     print ("StD - Propaganda = " + str(prop_std))
     print ("StD - Trusted = " + str(trusted_std))
+    print ("StD - ALL = " + str(all_std))
 
 def provide_statistics_newCorpus(ds_files):
     propaganda =[]
     trusted =[]
-
+    all =[]
     for ds_file in ds_files:
         count_propaganda = 0
         count_trusted = 0
@@ -285,6 +289,7 @@ def provide_statistics_newCorpus(ds_files):
             for line in lines:
                 line=line.strip()
                 fields = line.split('\t')
+                all.append(fields[0])
                 if fields[-1] =='-1':
                     trusted.append(fields[0])
                     count_trusted+=1
@@ -300,12 +305,14 @@ def provide_statistics_newCorpus(ds_files):
 
     propaganda_avg_length, prop_std=average_length_and_std(propaganda)
     trusted_avg_length,trusted_std= average_length_and_std(trusted)
+    all_avg_length, all_std = average_length_and_std(all)
     print ("Average lengths - Propaganda = " + str(propaganda_avg_length))
     print ("Average lengths - Trusted = " + str(trusted_avg_length))
+    print ("Average lengths - ALL = " + str(all_avg_length))
     print ('-----------------------------------------------------------')
     print ("StD - Propaganda = " + str(prop_std))
     print ("StD - Trusted = " + str(trusted_std))
-
+    print ("StD - ALL = " + str(all_std))
 
 
 def load_sources(sources_file):
@@ -359,10 +366,11 @@ def bias_statistics(ds_file):
         print 'right- center- biased sources = ' + str(len(right_c_biased_used))
 
 
-bias_statistics('../data/train.dist.converted.txt')
-bias_statistics('../data/dev.dist.converted.txt')
-bias_statistics('../data/test.dist.converted.txt')
-#provide_statistics_newCorpus(['../data/train.dist.converted.txt','../data/dev.dist.converted.txt', '../data/test.dist.converted.txt'])
+#bias_statistics('../data/train.dist.converted.txt')
+#bias_statistics('../data/dev.dist.converted.txt')
+#bias_statistics('../data/test.dist.converted.txt')
+provide_statistics_newCorpus(['../data/train.dist.converted.txt','../data/dev.dist.converted.txt', '../data/test.dist.converted.txt'])
+#provide_statistics_rashkin(['../data/xtrain.txt.filtered.txt','../data/xdev.txt.filtered.txt', '../data/xtest.txt.filtered.txt'])
 #distribute_sources('../data/train.json.converted.txt','../data/dev.json.converted.txt','../data/test.json.converted.txt')
 #remove_redundants('../data/train.json.converted.txt')
 #rashkan_statistics('../data/test.txtconverted.txt')
