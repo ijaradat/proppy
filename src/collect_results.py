@@ -4,10 +4,15 @@ import glob
 
 
 #opens all files in a specific folder and collects results
-def get_results(directory = '../results/slurms_notfidf_6/*.out'):
+def get_results(directory):
     for f in glob.glob(directory):
         with codecs.open(f+'-easy.tsv','w', encoding='utf8') as out:
             with codecs.open(f,'r', encoding='utf8') as log:
+                subdir = directory.replace('*.out','')
+                expNo = f.replace(subdir,'')
+                expNo= expNo.replace('slurm-','')
+                expNo =expNo.replace('.out','')
+
                 lines = log.readlines()
                 for line in lines:
                     if "('sources', " in line:
@@ -71,8 +76,6 @@ def get_results(directory = '../results/slurms_notfidf_6/*.out'):
                         nela = nela.replace("'", "")
                         break
 
-
-
                 scores=[]
                 for i in range(len(lines) - 1):
                     if "F1 score:" in lines[i] or "Accuarcy :" in lines[i] or "Recall :" in lines[i] or "Precision :" in lines[i]:
@@ -81,10 +84,11 @@ def get_results(directory = '../results/slurms_notfidf_6/*.out'):
                 scores_string=""
                 for score in scores:
                     scores_string +=score+'\t'
-                out.write("done\t"+baseline+"\t"+char_grams+"\t"+lexical+"\t"+style+"\t"+readability+"\t"+nela+"\t"+sources[0]+'\t'+sources[1]+'\t'+sources[2]+'\t'+scores_string+'\n')
+                out.write(expNo+"\tdone\t"+baseline+"\t"+char_grams+"\t"+lexical+"\t"+style+"\t"+readability+"\t"+nela+"\t"+sources[0]+'\t'+sources[1]+'\t'+sources[2]+'\t'+scores_string+'\n')
 
-def collect_from_files(directory = '../results/slurms_notfidf_6/*.tsv'):
-    with codecs.open('combined.tsv', 'w', encoding='utf8') as out:
+def collect_from_files(directory):
+    dir = directory.replace('*.tsv','')
+    with codecs.open(dir+'combned.tsv', 'w', encoding='utf8') as out:
         for f in glob.glob(directory):
             with codecs.open(f , 'r', encoding='utf8') as log:
                 lines = log.readlines()
@@ -100,6 +104,7 @@ def collect_from_files(directory = '../results/slurms_notfidf_6/*.tsv'):
 
 
 
-
-get_results()
-collect_from_files()
+directory = '../results/slurms_notfidf_7/*.out'
+results = '../results/slurms_notfidf_7/*.tsv'
+get_results(directory)
+collect_from_files(results)
